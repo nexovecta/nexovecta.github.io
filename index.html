@@ -504,7 +504,7 @@
             reload() {
                 if (this.reloading || this.ammo === this.maxAmmo) return;
                 this.reloading = true;
-                this.reloadTime = 60;
+                this.reloadTime = 5; //60
             }
             
             takeDamage(amount) {
