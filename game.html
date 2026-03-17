@@ -439,7 +439,7 @@
                 </div>
                 <div class="control-section">
                     <h3>Combat</h3>
-                    <div class="control-row"><span>MOUSE</span> Aim & Shoot</div>
+                    <div class="control-row"><span>MOUSE HOLD</span> Continuous Fire</div>
                     <div class="control-row"><span>1 2 3</span> Switch Weapons</div>
                     <div class="control-row"><span>R</span> Reload</div>
                     <div class="control-row"><span>F</span> Melee Attack</div>
@@ -493,11 +493,11 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
-        // Game constants - optimized
-        const WORLD_WIDTH = 10000;
+        // Game constants - UNLIMITED WORLD
+        const WORLD_WIDTH = Infinity; // No limit!
         const GRAVITY = 0.6;
         const GROUND_Y = 650;
-        const MAX_ENTITIES = 200;
+        const MAX_ENTITIES = 300; // Increased for unlimited world
         const BULLET_POOL_SIZE = 500;
         const PARTICLE_POOL_SIZE = 1000;
         
@@ -521,9 +521,9 @@
         
         // Input
         const keys = {};
-        const mouse = { x: 0, y: 0, down: false, clicked: false };
+        const mouse = { x: 0, y: 0, down: false };
         
-        // Game object arrays - using object pools for better performance
+        // Game object arrays
         let gamePlayer = null;
         let gameBullets = [];
         let gameZombies = [];
@@ -535,11 +535,11 @@
         let gameSpawnPoints = [];
         let gamePickups = [];
         
-        // Object pools
-        const bulletPool = [];
-        const particlePool = [];
+        // Shooting cooldown tracking
+        let lastShotTime = 0;
+        const FIRE_RATE_CHECK = 16; // ms between shot checks (approx 60fps)
         
-        // Input handlers with debouncing
+        // Input handlers
         document.addEventListener('keydown', (e) => {
             keys[e.code] = true;
             
@@ -578,10 +578,10 @@
             mouse.y = e.clientY - rect.top;
         });
         
+        // FIXED: Mouse down for continuous shooting
         canvas.addEventListener('mousedown', (e) => {
             e.preventDefault();
             mouse.down = true;
-            mouse.clicked = true;
         });
         
         canvas.addEventListener('mouseup', () => {
@@ -590,7 +590,12 @@
         
         canvas.addEventListener('contextmenu', (e) => e.preventDefault());
         
-        // Performance-optimized Particle class
+        // Mouse leave - stop shooting
+        canvas.addEventListener('mouseleave', () => {
+            mouse.down = false;
+        });
+        
+        // Particle class
         class Particle {
             constructor() {
                 this.reset(0, 0, 0, 0, '#fff', 1, 1, 'normal');
@@ -644,7 +649,7 @@
             }
         }
         
-        // Optimized Casing class
+        // Casing class
         class Casing {
             constructor(x, y, vx, vy, type) {
                 this.x = x;
@@ -678,7 +683,6 @@
                         }
                     }
                     
-                    // Optimized platform collision
                     for (let i = 0; i < platforms.length; i++) {
                         const p = platforms[i];
                         if (this.x > p.x && this.x < p.x + p.w && 
@@ -720,7 +724,7 @@
             }
         }
         
-        // Optimized Bullet class
+        // Bullet class
         class Bullet {
             constructor(x, y, angle, weaponType, damage) {
                 this.x = x;
@@ -745,7 +749,6 @@
                 
                 if (this.distance > this.maxDistance) this.active = false;
                 
-                // Optimized platform collision
                 for (let i = 0; i < platforms.length; i++) {
                     const p = platforms[i];
                     if (this.x > p.x && this.x < p.x + p.w &&
@@ -783,7 +786,7 @@
             }
         }
         
-        // Enhanced Weapon class
+        // Weapon class
         class Weapon {
             constructor(type) {
                 this.type = type;
@@ -801,7 +804,7 @@
                 if (type === 'pistol') {
                     this.name = 'PISTOL';
                     this.damage = 28 * difficultyMultiplier;
-                    this.fireRate = 180;
+                    this.fireRate = 180; // ms between shots
                     this.reloadDuration = 90;
                     this.magazine = 15;
                     this.ammoReserve = Infinity;
@@ -834,7 +837,13 @@
             canShoot(time) {
                 if (this.reloading) return false;
                 if (time - this.lastShot < this.fireRate) return false;
-                if (this.currentMag <= 0) return false;
+                if (this.currentMag <= 0) {
+                    // Auto-reload if empty
+                    if (this.ammoReserve !== 0) {
+                        this.reload();
+                    }
+                    return false;
+                }
                 return true;
             }
             
@@ -900,7 +909,7 @@
             }
         }
         
-        // Enhanced Player class
+        // Player class
         class Player {
             constructor(x = 200, y = GROUND_Y - 100) {
                 this.x = x;
@@ -948,7 +957,6 @@
                     this.meleeCooldown = 30;
                     createMeleeEffect(this.x + (this.facingRight ? 30 : -30), this.y + 30);
                     
-                    // Check nearby zombies
                     for (let i = gameZombies.length - 1; i >= 0; i--) {
                         const z = gameZombies[i];
                         const dx = Math.abs(this.x - z.x);
@@ -1013,28 +1021,23 @@
                     this.grounded = true;
                 }
                 
-                // World boundaries
-                this.x = Math.max(0, Math.min(WORLD_WIDTH, this.x));
+                // UNLIMITED WORLD - No right boundary!
+                if (this.x < 0) this.x = 0;
                 
-                // Camera follow with smoothing
+                // Camera follow with smoothing - no right limit
                 const targetCamX = this.x - canvas.width * 0.4;
                 camera.x += (targetCamX - camera.x) * 0.1;
-                camera.x = Math.max(0, Math.min(WORLD_WIDTH - canvas.width, camera.x));
+                if (camera.x < 0) camera.x = 0;
+                // Removed right boundary check for camera
                 
                 if (this.recoil > 0) this.recoil *= 0.85;
                 if (this.meleeCooldown > 0) this.meleeCooldown--;
                 
                 this.currentWeapon.update();
                 
-                // Auto reload
-                const w = this.currentWeapon;
-                if (w.currentMag === 0 && !w.reloading && w.ammoReserve !== 0) {
-                    w.reload();
-                }
-                
                 this.checkCollectibles();
                 
-                // Wave progression
+                // Wave progression based on kills
                 if (totalKills > wave * 20) {
                     wave++;
                     showNotification(`WAVE ${wave} - Get Ready!`);
@@ -1083,13 +1086,20 @@
                 }
             }
             
+            // FIXED: Shoot method - now uses timestamp
             shoot() {
                 const weapon = this.currentWeapon;
-                const bulletData = weapon.shoot(Date.now());
+                const currentTime = Date.now();
+                
+                // Check if weapon can shoot
+                if (!weapon.canShoot(currentTime)) {
+                    return false;
+                }
+                
+                const bulletData = weapon.shoot(currentTime);
                 
                 if (!bulletData) {
-                    if (weapon.currentMag === 0 && !weapon.reloading) weapon.reload();
-                    return;
+                    return false;
                 }
                 
                 const recoilAmounts = { pistol: 4, shotgun: 15, rifle: 6 };
@@ -1127,6 +1137,7 @@
                 createMuzzleFlash(muzzleX, muzzleY, weapon.type, baseAngle);
                 
                 updateWeaponHUD();
+                return true;
             }
             
             reload() {
@@ -1171,7 +1182,6 @@
                     ctx.globalAlpha = 0.5;
                 }
                 
-                // Draw player
                 this.drawPlayerModel(ctx, screenX, screenY);
                 
                 ctx.globalAlpha = 1;
@@ -1239,10 +1249,6 @@
                 }
                 
                 // Draw weapon
-                this.drawWeapon(ctx, screenX, screenY);
-            }
-            
-            drawWeapon(ctx, screenX, screenY) {
                 const weapon = this.currentWeapon;
                 const aimAngle = Math.atan2(mouse.y - (screenY + 30), mouse.x - screenX);
                 
@@ -1254,8 +1260,6 @@
                 const recoilOffset = this.recoil * Math.cos(aimAngle) * 0.5;
                 ctx.rotate(aimAngle);
                 ctx.translate(-recoilOffset, 0);
-                
-                ctx.fillStyle = '#e8c39e';
                 
                 if (weapon.type === 'rifle') {
                     // Rifle
@@ -1341,7 +1345,7 @@
             }
         }
         
-        // Enhanced Zombie class
+        // Zombie class
         class Zombie {
             constructor(x, y, type = 'normal') {
                 this.x = x;
@@ -1384,7 +1388,6 @@
                 const dy = player.y - this.y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
                 
-                // State machine
                 if (dist < this.sightRange && Math.abs(dy) < 200) {
                     this.state = 'chase';
                     this.targetX = player.x;
@@ -1395,7 +1398,6 @@
                     }
                 }
                 
-                // Movement
                 const moveDir = this.targetX > this.x ? 1 : -1;
                 const targetSpeed = this.state === 'chase' ? this.speed * 1.3 : this.speed * 0.3;
                 
@@ -1410,7 +1412,6 @@
                 
                 this.x += this.vx;
                 
-                // Physics
                 this.grounded = false;
                 if (this.y + this.height < GROUND_Y) {
                     for (let p of platforms) {
@@ -1436,7 +1437,6 @@
                     this.grounded = true;
                 }
                 
-                // Attack
                 if (dist < 45 && this.attackCooldown <= 0 && Math.abs(dy) < 50) {
                     this.state = 'attack';
                     this.attackCooldown = 60;
@@ -1451,8 +1451,8 @@
                 
                 if (this.attackCooldown > 0) this.attackCooldown--;
                 
-                // Cull off-screen zombies
-                if (this.x < camera.x - 300) this.active = false;
+                // Cull zombies that are too far behind
+                if (this.x < camera.x - 800) this.active = false;
             }
             
             takeDamage(dmg, isHeadshot = false) {
@@ -1468,7 +1468,6 @@
                     if (isHeadshot) score += 10;
                     createBloodExplosion(this.x, this.y + this.height/2, 30);
                     
-                    // Chance to drop pickup
                     if (Math.random() < 0.1) {
                         createPickup(this.x, this.y);
                     }
@@ -1786,41 +1785,46 @@
             setTimeout(() => el.classList.remove('show'), 2000);
         }
         
-        // Level generation
+        // Level generation - UNLIMITED
         function generateLevel() {
             gamePlatforms = [];
             gameSpawnPoints = [];
             gameHealthPacks = [];
             gamePickups = [];
             
+            // Generate platforms procedurally (will generate as player moves)
+            generateMorePlatforms(0, 5000);
+            
+            // Initial health packs
+            for (let i = 0; i < 15; i++) {
+                const x = 1000 + Math.random() * 4000;
+                const y = GROUND_Y - 50 - Math.random() * 300;
+                gameHealthPacks.push(new HealthPack(x, y));
+            }
+        }
+        
+        function generateMorePlatforms(startX, endX) {
             // Main platforms
-            for (let x = 500; x < WORLD_WIDTH; x += 800 + Math.random() * 600) {
+            for (let x = startX; x < endX; x += 800 + Math.random() * 600) {
                 const w = 200 + Math.random() * 300;
                 const y = GROUND_Y - 80 - Math.random() * 100;
                 gamePlatforms.push({ x, y, w, h: 20 });
             }
             
             // High platforms
-            for (let x = 300; x < WORLD_WIDTH; x += 1200 + Math.random() * 800) {
+            for (let x = startX + 300; x < endX; x += 1200 + Math.random() * 800) {
                 const w = 150 + Math.random() * 200;
                 const y = GROUND_Y - 200 - Math.random() * 150;
                 gamePlatforms.push({ x, y, w, h: 15 });
             }
             
             // Spawn points
-            for (let x = 800; x < WORLD_WIDTH; x += 400 + Math.random() * 300) {
+            for (let x = startX + 800; x < endX; x += 400 + Math.random() * 300) {
                 gameSpawnPoints.push({ 
                     x, 
                     types: ['normal', 'normal', 'fast', 'normal', 'normal', 'fast'],
                     active: true 
                 });
-            }
-            
-            // Health packs
-            for (let i = 0; i < 15; i++) {
-                const x = 1000 + Math.random() * (WORLD_WIDTH - 2000);
-                const y = GROUND_Y - 50 - Math.random() * 300;
-                gameHealthPacks.push(new HealthPack(x, y));
             }
         }
         
@@ -1837,10 +1841,8 @@
             for (let i = 0; i < count; i++) {
                 if (gameZombies.length < MAX_ENTITIES) {
                     const spawnX = gamePlayer.x + 600 + Math.random() * 800;
-                    if (spawnX < WORLD_WIDTH) {
-                        const type = Math.random() > 0.7 ? 'fast' : 'normal';
-                        gameZombies.push(new Zombie(spawnX, GROUND_Y - 70, type));
-                    }
+                    const type = Math.random() > 0.7 ? 'fast' : 'normal';
+                    gameZombies.push(new Zombie(spawnX, GROUND_Y - 70, type));
                 }
             }
         }
@@ -1890,6 +1892,18 @@
             
             if (screenShake > 0) screenShake *= 0.9;
             
+            // FIXED: Continuous shooting while mouse is held down
+            if (mouse.down && gamePlayer) {
+                gamePlayer.shoot();
+            }
+            
+            // Generate more platforms and spawn points as player moves forward
+            if (gamePlayer && gamePlayer.x > lastGeneratedX - 2000) {
+                const newEndX = gamePlayer.x + 3000;
+                generateMorePlatforms(lastGeneratedX, newEndX);
+                lastGeneratedX = newEndX;
+            }
+            
             // Spawn zombies
             if (gameZombies.length < MAX_ENTITIES) {
                 gameSpawnPoints.forEach(sp => {
@@ -1899,11 +1913,10 @@
                     }
                 });
                 
+                // Random spawns ahead of player
                 if (Math.random() < 0.01 + wave * 0.002) {
-                    const spawnX = gamePlayer.x + 600 + Math.random() * 400;
-                    if (spawnX < WORLD_WIDTH) {
-                        gameZombies.push(new Zombie(spawnX, GROUND_Y - 70, Math.random() > 0.8 ? 'fast' : 'normal'));
-                    }
+                    const spawnX = gamePlayer.x + 600 + Math.random() * 800;
+                    gameZombies.push(new Zombie(spawnX, GROUND_Y - 70, Math.random() > 0.8 ? 'fast' : 'normal'));
                 }
             }
             
@@ -1993,8 +2006,10 @@
             }
         }
         
+        let lastGeneratedX = 5000; // Track how far we've generated
+        
         function draw() {
-            // Clear with fade effect
+            // Clear
             ctx.fillStyle = '#050505';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
@@ -2032,7 +2047,7 @@
             ctx.fill();
             ctx.restore();
             
-            // City skyline
+            // City skyline (repeating)
             ctx.fillStyle = '#0a0a12';
             for (let i = 0; i < 40; i++) {
                 const h = 100 + Math.sin(i * 123) * 80;
@@ -2044,9 +2059,9 @@
             const cx = camera.x;
             const cy = camera.y;
             
-            // Platforms
+            // Draw platforms (only visible ones)
             gamePlatforms.forEach(p => {
-                if (p.x - cx > -100 && p.x - cx < canvas.width + 100) {
+                if (p.x - cx > -200 && p.x - cx < canvas.width + 200) {
                     ctx.fillStyle = '#2a2a2a';
                     ctx.fillRect(p.x - cx, p.y - cy, p.w, p.h);
                     ctx.fillStyle = '#3a3a3a';
@@ -2065,17 +2080,27 @@
             gameCasings.forEach(c => c.draw(ctx, cx, cy));
             gameMagazines.forEach(m => m.draw(ctx, cx, cy));
             
-            // Pickups
-            gameHealthPacks.forEach(h => h.draw(ctx, cx, cy));
-            gamePickups.forEach(p => p.draw(ctx, cx, cy));
+            // Pickups (only visible ones)
+            gameHealthPacks.forEach(h => {
+                if (h.x - cx > -100 && h.x - cx < canvas.width + 100) {
+                    h.draw(ctx, cx, cy);
+                }
+            });
+            gamePickups.forEach(p => {
+                if (p.x - cx > -100 && p.x - cx < canvas.width + 100) {
+                    p.draw(ctx, cx, cy);
+                }
+            });
             
             // Particles behind entities
             gameParticles.forEach(p => {
-                if (p.y > gamePlayer.y) p.draw(ctx, cx, cy);
+                if (p.y > gamePlayer.y && p.x - cx > -100 && p.x - cx < canvas.width + 100) {
+                    p.draw(ctx, cx, cy);
+                }
             });
             
             // Entities sorted by Y for proper depth
-            const entities = [...gameZombies];
+            const entities = [...gameZombies.filter(z => z.x - cx > -200 && z.x - cx < canvas.width + 200)];
             if (gamePlayer) entities.push(gamePlayer);
             entities.sort((a, b) => a.y - b.y);
             entities.forEach(e => e.draw(ctx, cx, cy));
@@ -2085,7 +2110,9 @@
             
             // Particles in front
             gameParticles.forEach(p => {
-                if (p.y <= gamePlayer.y) p.draw(ctx, cx, cy);
+                if (p.y <= gamePlayer.y && p.x - cx > -100 && p.x - cx < canvas.width + 100) {
+                    p.draw(ctx, cx, cy);
+                }
             });
             
             ctx.restore();
@@ -2152,6 +2179,7 @@
                 gameTime: gameTime,
                 difficulty: difficulty,
                 stats: gameStats,
+                lastGeneratedX: lastGeneratedX,
                 timestamp: Date.now()
             };
             localStorage.setItem('deadRunSave', JSON.stringify(saveData));
@@ -2168,7 +2196,6 @@
             
             const data = JSON.parse(saveData);
             
-            // Set difficulty
             if (data.difficulty) {
                 setDifficulty(data.difficulty);
             }
@@ -2193,6 +2220,7 @@
             totalKills = data.totalKills || 0;
             gameTime = data.gameTime || 0;
             gameStats = data.stats || { headshots: 0, accuracy: 0, shotsFired: 0, shotsHit: 0 };
+            lastGeneratedX = data.lastGeneratedX || 5000;
             
             gameZombies = [];
             gameBullets = [];
@@ -2236,6 +2264,7 @@
                 gameParticles = [];
                 gameCasings = [];
                 gameMagazines = [];
+                lastGeneratedX = 5000;
             }
             
             gameRunning = true;
