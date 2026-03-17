@@ -95,21 +95,6 @@
             text-shadow: 1px 1px 3px #000;
         }
         
-        .armor-bar {
-            width: 180px;
-            height: 8px;
-            background: rgba(0,0,0,0.8);
-            border: 1px solid #666;
-            border-radius: 2px;
-            overflow: hidden;
-        }
-        
-        .armor-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #1e3a8a, #3b82f6);
-            width: 0%;
-        }
-        
         .weapon-panel {
             background: rgba(0,0,0,0.7);
             border: 2px solid #555;
@@ -373,17 +358,6 @@
         .notification.show {
             opacity: 1;
         }
-        
-        .minimap {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 200px;
-            height: 60px;
-            background: rgba(0,0,0,0.7);
-            border: 2px solid #444;
-            border-radius: 5px;
-        }
     </style>
 </head>
 <body>
@@ -399,16 +373,13 @@
                                 <div class="health-fill" id="healthFill" style="width: 100%"></div>
                                 <div class="health-text" id="healthText">100/100</div>
                             </div>
-                            <div class="armor-bar">
-                                <div class="armor-fill" id="armorFill"></div>
-                            </div>
                         </div>
                     </div>
                 </div>
                 
                 <div class="weapon-panel" id="weaponPanel">
                     <div class="weapon-name" id="weaponName">PISTOL</div>
-                    <div class="ammo-main" id="ammoMain">12/∞</div>
+                    <div class="ammo-main" id="ammoMain">15/∞</div>
                     <div class="ammo-reserve" id="ammoReserve">Tactical Sidearm</div>
                 </div>
                 
@@ -440,15 +411,15 @@
             <h1>Dead Run</h1>
             <div class="subtitle">Tactical Zombie Elimination</div>
             <div class="button-group">
-                <button onclick="startGame(false)">New Game</button>
-                <button class="secondary" onclick="loadGame()" id="loadBtn">Resume</button>
+                <button onclick="startGame(true)">New Game</button>
+                <button class="secondary" onclick="loadGame()" id="loadBtn" style="display:none">Resume</button>
             </div>
             <div class="controls-grid">
                 <div class="control-section">
                     <h3>Movement</h3>
                     <div class="control-row"><span>A / ←</span> Move Left</div>
                     <div class="control-row"><span>D / →</span> Move Right</div>
-                    <div class="control-row"><span>W / ↑ / SPACE</span> Jump / Climb</div>
+                    <div class="control-row"><span>W / ↑ / SPACE</span> Jump</div>
                     <div class="control-row"><span>S / ↓</span> Drop Down</div>
                 </div>
                 <div class="control-section">
@@ -547,9 +518,6 @@
             if (e.code === 'Digit1') player.switchWeapon(0);
             if (e.code === 'Digit2') player.switchWeapon(1);
             if (e.code === 'Digit3') player.switchWeapon(2);
-            if (e.code === 'KeyS' || e.code === 'ArrowDown') {
-                if (player.onPlatform) player.dropFromPlatform();
-            }
         });
         
         document.addEventListener('keyup', (e) => {
@@ -688,13 +656,11 @@
                 ctx.rotate(this.rotation);
                 
                 if (this.type === 'shotgun') {
-                    // Shotgun shell - red plastic
                     ctx.fillStyle = '#dc143c';
                     ctx.fillRect(-this.size.w/2, -this.size.h/2, this.size.w, this.size.h * 0.7);
                     ctx.fillStyle = '#daa520';
                     ctx.fillRect(-this.size.w/2, this.size.h * 0.2, this.size.w, this.size.h * 0.3);
                 } else {
-                    // Rifle/pistol casing - brass
                     ctx.fillStyle = '#b8860b';
                     ctx.fillRect(-this.size.w/2, -this.size.h/2, this.size.w, this.size.h);
                     ctx.fillStyle = '#daa520';
@@ -742,13 +708,11 @@
                 ctx.translate(this.x - camX, this.y - camY);
                 ctx.rotate(this.rotation);
                 
-                // Magazine body
                 ctx.fillStyle = '#2c3e50';
                 ctx.fillRect(-6, -10, 12, 20);
                 ctx.fillStyle = '#34495e';
                 ctx.fillRect(-5, -9, 10, 18);
                 
-                // Rounds visible
                 ctx.fillStyle = '#b8860b';
                 for (let i = 0; i < 4; i++) {
                     ctx.fillRect(-4, -8 + i * 4, 8, 2);
@@ -774,8 +738,6 @@
                 this.active = true;
                 this.distance = 0;
                 this.maxDistance = weapon === 'shotgun' ? 400 : weapon === 'pistol' ? 800 : 1200;
-                this.penetration = weapon === 'rifle' ? 2 : 1;
-                this.hitZombies = [];
             }
             
             update() {
@@ -789,7 +751,6 @@
                 platforms.forEach(p => {
                     if (this.x > p.x && this.x < p.x + p.w &&
                         this.y > p.y && this.y < p.y + p.h) {
-                        createImpact(this.x, this.y, this.angle + Math.PI, 'concrete');
                         this.active = false;
                     }
                 });
@@ -809,7 +770,6 @@
                 ctx.arc(this.x - camX, this.y - camY, this.weapon === 'shotgun' ? 2 : 3, 0, Math.PI * 2);
                 ctx.fill();
                 
-                // Trail
                 ctx.strokeStyle = colors[this.weapon];
                 ctx.lineWidth = this.weapon === 'rifle' ? 3 : 2;
                 ctx.globalAlpha = alpha * 0.5;
@@ -839,7 +799,6 @@
                         magazine: 15,
                         ammoReserve: Infinity,
                         color: '#888',
-                        auto: false,
                         casingType: 'pistol'
                     },
                     shotgun: {
@@ -851,7 +810,6 @@
                         ammoReserve: 100,
                         maxReserve: 100,
                         color: '#8b4513',
-                        auto: false,
                         pellets: 6,
                         casingType: 'shotgun'
                     },
@@ -864,14 +822,12 @@
                         ammoReserve: 200,
                         maxReserve: 200,
                         color: '#2c3e50',
-                        auto: true,
                         casingType: 'rifle'
                     }
                 };
                 
                 Object.assign(this, configs[type]);
                 this.currentMag = this.magazine;
-                this.ammoReserve = this.ammoReserve === Infinity ? Infinity : this.ammoReserve;
             }
             
             canShoot(time) {
@@ -929,9 +885,9 @@
                     }
                 }
                 
-                // Ammo regeneration for shotgun and rifle
+                // Ammo regeneration
                 if (this.ammoReserve !== Infinity && this.ammoReserve < this.maxReserve) {
-                    if (Math.random() < 0.002) { // Very slow regen
+                    if (Math.random() < 0.002) {
                         this.ammoReserve++;
                     }
                 }
@@ -975,7 +931,6 @@
                 this.facingRight = true;
                 this.animFrame = 0;
                 this.recoil = 0;
-                this.crouch = false;
             }
             
             get currentWeapon() {
@@ -993,9 +948,9 @@
             update() {
                 this.animFrame += 0.15;
                 
-                // Horizontal movement
+                // Movement
                 let moveSpeed = this.speed;
-                if (keys['ShiftLeft']) moveSpeed *= 0.5; // Walk
+                if (keys['ShiftLeft']) moveSpeed *= 0.5;
                 
                 if (keys['ArrowLeft'] || keys['KeyA']) {
                     this.vx = -moveSpeed;
@@ -1005,17 +960,6 @@
                     this.facingRight = true;
                 } else {
                     this.vx *= 0.82;
-                }
-                
-                // Crouch
-                this.crouch = keys['ControlLeft'] || keys['KeyS'] || keys['ArrowDown'];
-                if (this.crouch && this.grounded) {
-                    this.vx *= 0.5;
-                    this.height = 45;
-                    this.y += 30;
-                } else if (!this.crouch && this.height === 45) {
-                    this.height = 75;
-                    this.y -= 30;
                 }
                 
                 // Jump
@@ -1035,7 +979,7 @@
                 this.onPlatform = null;
                 platforms.forEach(p => {
                     if (this.x + this.width/2 > p.x && this.x - this.width/2 < p.x + p.w) {
-                        if (this.y + this.height > p.y && this.y + this.height < p.y + p.h + 20 && this.vy >= 0) {
+                        if (this.y + this.height > p.y && this.y + this.height < p.y + 30 && this.vy >= 0) {
                             this.y = p.y - this.height;
                             this.vy = 0;
                             this.grounded = true;
@@ -1077,16 +1021,7 @@
                 this.checkCollectibles();
             }
             
-            dropFromPlatform() {
-                if (this.onPlatform) {
-                    this.y += 5;
-                    this.onPlatform = null;
-                    this.grounded = false;
-                }
-            }
-            
             checkCollectibles() {
-                // Health packs
                 healthPacks = healthPacks.filter(h => {
                     const dx = this.x - h.x;
                     const dy = this.y + this.height/2 - h.y;
@@ -1111,15 +1046,12 @@
                     return;
                 }
                 
-                // Recoil
                 const recoilAmounts = { pistol: 4, shotgun: 15, rifle: 6 };
                 this.recoil = recoilAmounts[weapon.type] || 5;
                 
-                // Screen shake
                 const shakeAmounts = { pistol: 3, shotgun: 12, rifle: 4 };
                 screenShake = shakeAmounts[weapon.type] || 3;
                 
-                // Calculate aim
                 const screenX = this.x - camera.x;
                 const baseAngle = Math.atan2(mouse.y - (this.y + 30), mouse.x - screenX);
                 
@@ -1133,7 +1065,7 @@
                     casings.push(new Casing(casingX, casingY, casingVx, casingVy, weapon.casingType));
                 }
                 
-                // Drop magazine on reload start (visual only)
+                // Drop magazine on reload
                 if (weapon.currentMag === 0 && weapon.type !== 'shotgun') {
                     magazines.push(new Magazine(
                         this.x + (this.facingRight ? 20 : -20),
@@ -1143,15 +1075,13 @@
                     ));
                 }
                 
-                // Create bullets
                 bullets.forEach(b => {
                     const angle = baseAngle + b.spread;
                     const startX = this.x + Math.cos(angle) * 45;
                     const startY = this.y + 30 + Math.sin(angle) * 10;
-                    gameBullets.push(new Bullet(startX, startY, angle, weapon.type));
+                    bullets.push(new Bullet(startX, startY, angle, weapon.type));
                 });
                 
-                // Muzzle effects
                 const muzzleX = this.x + Math.cos(baseAngle) * 50;
                 const muzzleY = this.y + 30 + Math.sin(baseAngle) * 10;
                 
@@ -1173,7 +1103,6 @@
             }
             
             takeDamage(amount) {
-                // Armor absorbs damage
                 if (this.armor > 0) {
                     const absorb = Math.min(this.armor, amount * 0.5);
                     this.armor -= absorb;
@@ -1203,40 +1132,32 @@
                 ctx.ellipse(screenX, screenY + this.height - 5, 25, 8, 0, 0, Math.PI * 2);
                 ctx.fill();
                 
-                // Legs (tactical pants with knee pads)
+                // Legs
                 ctx.fillStyle = '#1a1a2a';
                 const legW = 11;
                 const legGap = 6;
-                const legHeight = this.crouch ? 25 : 35;
                 
-                // Left leg
                 let leftLegX = screenX - legGap - legW + legCycle * 4;
-                ctx.fillRect(leftLegX, screenY + 40, legW, legHeight);
-                // Knee pad
+                ctx.fillRect(leftLegX, screenY + 40, legW, 35);
                 ctx.fillStyle = '#2c3e50';
                 ctx.fillRect(leftLegX - 1, screenY + 55, legW + 2, 8);
                 
-                // Right leg
                 ctx.fillStyle = '#1a1a2a';
                 let rightLegX = screenX + legGap - legCycle * 4;
-                ctx.fillRect(rightLegX, screenY + 40, legW, legHeight);
-                // Knee pad
+                ctx.fillRect(rightLegX, screenY + 40, legW, 35);
                 ctx.fillStyle = '#2c3e50';
                 ctx.fillRect(rightLegX - 1, screenY + 55, legW + 2, 8);
                 
                 // Boots
                 ctx.fillStyle = '#0f0f0f';
-                ctx.fillRect(leftLegX - 2, screenY + 40 + legHeight - 5, legW + 4, 5);
-                ctx.fillRect(rightLegX - 2, screenY + 40 + legHeight - 5, legW + 4, 5);
+                ctx.fillRect(leftLegX - 2, screenY + 70, legW + 4, 5);
+                ctx.fillRect(rightLegX - 2, screenY + 70, legW + 4, 5);
                 
-                // Torso (plate carrier)
+                // Torso
                 ctx.fillStyle = '#2c3e50';
-                const torsoH = this.crouch ? 25 : 35;
-                ctx.fillRect(screenX - 16, screenY + 15, 32, torsoH);
-                
-                // Vest details
+                ctx.fillRect(screenX - 16, screenY + 15, 32, 35);
                 ctx.fillStyle = '#34495e';
-                ctx.fillRect(screenX - 14, screenY + 18, 28, torsoH - 6);
+                ctx.fillRect(screenX - 14, screenY + 18, 28, 29);
                 
                 // Magazine pouches
                 ctx.fillStyle = '#1a1a1a';
@@ -1244,29 +1165,28 @@
                 ctx.fillRect(screenX + 2, screenY + 22, 8, 12);
                 
                 // Head
-                const headY = this.crouch ? screenY - 5 : screenY;
                 ctx.fillStyle = '#e8c39e';
                 ctx.beginPath();
-                ctx.arc(screenX, headY + 10, 13, 0, Math.PI * 2);
+                ctx.arc(screenX, screenY + 10, 13, 0, Math.PI * 2);
                 ctx.fill();
                 
                 // Helmet
                 ctx.fillStyle = '#2c3e50';
                 ctx.beginPath();
-                ctx.arc(screenX, headY + 8, 14, Math.PI, 0);
+                ctx.arc(screenX, screenY + 8, 14, Math.PI, 0);
                 ctx.fill();
-                ctx.fillRect(screenX - 14, headY + 8, 28, 6);
+                ctx.fillRect(screenX - 14, screenY + 8, 28, 6);
                 
                 // NVG mount
                 ctx.fillStyle = '#1a1a1a';
-                ctx.fillRect(screenX - 8, headY + 2, 16, 4);
+                ctx.fillRect(screenX - 8, screenY + 2, 16, 4);
                 
                 // Eyes
                 ctx.fillStyle = '#000';
                 if (this.facingRight) {
-                    ctx.fillRect(screenX + 3, headY + 8, 4, 4);
+                    ctx.fillRect(screenX + 3, screenY + 8, 4, 4);
                 } else {
-                    ctx.fillRect(screenX - 7, headY + 8, 4, 4);
+                    ctx.fillRect(screenX - 7, screenY + 8, 4, 4);
                 }
                 
                 // Arms and Weapon
@@ -1278,12 +1198,11 @@
                 const shoulderY = screenY + 25;
                 ctx.translate(shoulderX, shoulderY);
                 
-                // Recoil kick
                 const recoilOffset = this.recoil * Math.cos(aimAngle) * 0.5;
                 ctx.rotate(aimAngle);
                 ctx.translate(-recoilOffset, 0);
                 
-                // Back arm (support hand)
+                // Back arm
                 ctx.fillStyle = '#e8c39e';
                 if (weapon.type === 'rifle') {
                     ctx.fillRect(8, 10, 20, 9);
@@ -1293,12 +1212,12 @@
                     ctx.fillRect(5, 10, 15, 8);
                 }
                 
-                // Draw weapon based on type
+                // Draw weapon
                 if (weapon.type === 'pistol') this.drawPistol(ctx);
                 else if (weapon.type === 'shotgun') this.drawShotgun(ctx);
                 else this.drawRifle(ctx);
                 
-                // Front arm (trigger hand)
+                // Front arm
                 ctx.fillStyle = '#e8c39e';
                 ctx.fillRect(-5, -4, 18, 9);
                 
@@ -1306,11 +1225,8 @@
             }
             
             drawPistol(ctx) {
-                // Glock-style pistol
                 ctx.fillStyle = '#2c3e50';
-                // Slide
                 ctx.fillRect(-3, -6, 24, 10);
-                // Grip
                 ctx.fillStyle = '#1a1a1a';
                 ctx.beginPath();
                 ctx.moveTo(-3, 4);
@@ -1319,69 +1235,51 @@
                 ctx.lineTo(6, 4);
                 ctx.fill();
                 
-                // Trigger guard
                 ctx.strokeStyle = '#2c3e50';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.arc(8, 2, 5, 0, Math.PI);
                 ctx.stroke();
                 
-                // Barrel tip
                 ctx.fillStyle = '#000';
                 ctx.fillRect(20, -5, 3, 4);
-                
-                // Sights
                 ctx.fillStyle = '#000';
                 ctx.fillRect(18, -8, 2, 2);
                 ctx.fillRect(-2, -8, 2, 2);
             }
             
             drawShotgun(ctx) {
-                // Remington 870 style
-                // Stock
                 ctx.fillStyle = '#4a3728';
                 ctx.fillRect(-28, -5, 22, 12);
                 
-                // Receiver
                 ctx.fillStyle = '#2c3e50';
                 ctx.fillRect(-8, -7, 35, 16);
                 
-                // Pump (animated)
                 const pumpOffset = this.recoil > 8 ? 6 : 0;
                 ctx.fillStyle = '#34495e';
                 ctx.fillRect(5 + pumpOffset, -5, 16, 12);
                 
-                // Barrel
                 ctx.fillStyle = '#1a252f';
                 ctx.fillRect(25, -4, 30, 6);
                 
-                // Forend
                 ctx.fillStyle = '#4a3728';
                 ctx.fillRect(20, 6, 14, 8);
                 
-                // Heat shield
                 ctx.fillStyle = '#2c3e50';
                 ctx.fillRect(30, -6, 20, 2);
                 
-                // Ejection port
                 ctx.fillStyle = '#000';
                 ctx.fillRect(0, -2, 8, 4);
             }
             
             drawRifle(ctx) {
-                // M4/AR-15 style
-                // Stock
                 ctx.fillStyle = '#1a1a1a';
                 ctx.fillRect(-30, -4, 25, 10);
                 
-                // Buffer tube
                 ctx.fillStyle = '#2c3e50';
                 ctx.fillRect(-8, -3, 15, 6);
-                
-                // Receiver
                 ctx.fillRect(5, -6, 25, 14);
                 
-                // Magazine (curved)
                 ctx.fillStyle = '#2c3e50';
                 ctx.beginPath();
                 ctx.moveTo(12, 8);
@@ -1390,30 +1288,23 @@
                 ctx.lineTo(20, 8);
                 ctx.fill();
                 
-                // Rounds in mag
                 ctx.fillStyle = '#b8860b';
                 ctx.fillRect(13, 10, 6, 3);
                 ctx.fillRect(12, 15, 8, 3);
                 
-                // Barrel
                 ctx.fillStyle = '#1a252f';
                 ctx.fillRect(28, -4, 35, 5);
                 
-                // Handguard
                 ctx.fillStyle = '#2c3e50';
                 ctx.fillRect(28, -7, 25, 10);
-                // Rails
+                
                 ctx.fillStyle = '#000';
                 for (let i = 0; i < 4; i++) {
                     ctx.fillRect(30 + i * 6, -8, 4, 2);
                 }
                 
-                // Carry handle / sights
                 ctx.fillStyle = '#000';
                 ctx.fillRect(15, -9, 12, 3);
-                
-                // Flash hider
-                ctx.fillStyle = '#000';
                 ctx.fillRect(62, -4, 6, 5);
             }
         }
@@ -1434,7 +1325,7 @@
                 this.active = true;
                 this.animFrame = Math.random() * 100;
                 this.attackCooldown = 0;
-                this.state = 'idle'; // idle, chase, attack, dead
+                this.state = 'idle';
                 this.targetX = x;
                 this.lungeTimer = 0;
             }
@@ -1446,19 +1337,16 @@
                 const dy = player.y - this.y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
                 
-                // AI Behavior
                 if (dist < 600 && Math.abs(dy) < 200) {
                     this.state = 'chase';
                     this.targetX = player.x;
                 } else {
                     this.state = 'idle';
-                    // Patrol slowly
                     if (Math.abs(this.x - this.targetX) < 10) {
                         this.targetX = this.x + (Math.random() - 0.5) * 200;
                     }
                 }
                 
-                // Movement
                 const moveDir = this.targetX > this.x ? 1 : -1;
                 const targetSpeed = this.state === 'chase' ? this.speed * 1.3 : this.speed * 0.3;
                 
@@ -1466,7 +1354,6 @@
                     this.vx += moveDir * 0.2;
                 }
                 
-                // Friction and limit
                 this.vx *= 0.95;
                 if (Math.abs(this.vx) > targetSpeed) {
                     this.vx *= 0.9;
@@ -1474,7 +1361,6 @@
                 
                 this.x += this.vx;
                 
-                // Platform collision for zombies
                 this.grounded = false;
                 if (this.y + this.height < GROUND_Y) {
                     platforms.forEach(p => {
@@ -1488,7 +1374,6 @@
                     });
                 }
                 
-                // Gravity
                 if (!this.grounded) {
                     this.vy += GRAVITY;
                     this.y += this.vy;
@@ -1500,7 +1385,6 @@
                     this.grounded = true;
                 }
                 
-                // Attack
                 if (dist < 45 && this.attackCooldown <= 0 && Math.abs(dy) < 50) {
                     this.state = 'attack';
                     this.attackCooldown = 60;
@@ -1515,15 +1399,12 @@
                 
                 if (this.attackCooldown > 0) this.attackCooldown--;
                 
-                // Remove if far behind camera
                 if (this.x < camera.x - 300) this.active = false;
             }
             
             takeDamage(dmg, isHeadshot = false) {
                 const actualDamage = isHeadshot ? dmg * 2.5 : dmg;
                 this.health -= actualDamage;
-                
-                // Knockback
                 this.vx = (this.x - player.x > 0 ? 1 : -1) * 2;
                 
                 if (this.health <= 0) {
@@ -1542,13 +1423,11 @@
                 const screenY = this.y - camY;
                 const walkCycle = Math.sin(this.animFrame * (this.state === 'chase' ? 5 : 2));
                 
-                // Shadow
                 ctx.fillStyle = 'rgba(0,0,0,0.4)';
                 ctx.beginPath();
                 ctx.ellipse(screenX, screenY + this.height - 3, 20, 6, 0, 0, Math.PI * 2);
                 ctx.fill();
                 
-                // Health bar
                 if (this.health < this.maxHealth) {
                     ctx.fillStyle = '#000';
                     ctx.fillRect(screenX - 25, screenY - 30, 50, 6);
@@ -1557,46 +1436,36 @@
                     ctx.fillRect(screenX - 25, screenY - 30, 50 * pct, 6);
                 }
                 
-                // Legs (rotting flesh)
                 ctx.fillStyle = this.type === 'fast' ? '#3d4a3d' : '#4a5a4a';
                 const legW = 10;
                 const legGap = 5;
                 
-                // Back leg
                 ctx.fillRect(screenX - legGap - legW + walkCycle * 5, screenY + 35, legW, this.height - 35);
-                // Front leg
                 ctx.fillRect(screenX + legGap - walkCycle * 5, screenY + 35, legW, this.height - 35);
                 
-                // Exposed bones on legs
                 ctx.fillStyle = '#ddd';
                 ctx.fillRect(screenX - legGap - legW + 3, screenY + 50, 4, 3);
                 
-                // Torso (tattered clothes)
                 ctx.fillStyle = this.type === 'fast' ? '#2d4016' : '#3d4a3d';
                 ctx.fillRect(screenX - 15, screenY + 15, 30, 25);
                 
-                // Ribs showing through
                 ctx.fillStyle = '#2a2a2a';
                 ctx.fillRect(screenX - 12, screenY + 20, 24, 2);
                 ctx.fillRect(screenX - 10, screenY + 28, 20, 2);
                 
-                // Arms (reaching)
                 ctx.fillStyle = this.type === 'fast' ? '#3d6020' : '#4a5a4a';
                 const reach = this.state === 'attack' ? 15 : Math.sin(this.animFrame * 3) * 5;
                 
-                // Left arm
                 ctx.save();
                 ctx.translate(screenX - 15, screenY + 20);
                 ctx.rotate(-0.5 + reach * 0.05);
                 ctx.fillRect(-8, 0, 16, 25);
-                // Hand
                 ctx.fillStyle = '#5a6a5a';
                 ctx.beginPath();
                 ctx.arc(0, 28, 8, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.restore();
                 
-                // Right arm
                 ctx.fillStyle = this.type === 'fast' ? '#3d6020' : '#4a5a4a';
                 ctx.save();
                 ctx.translate(screenX + 15, screenY + 20);
@@ -1608,21 +1477,17 @@
                 ctx.fill();
                 ctx.restore();
                 
-                // Head (rotting)
                 ctx.save();
                 ctx.translate(screenX, screenY + 5);
                 
-                // Neck (exposed spine)
                 ctx.fillStyle = '#ddd';
                 ctx.fillRect(-3, 10, 6, 8);
                 
-                // Skull/head
                 ctx.fillStyle = '#5a6a5a';
                 ctx.beginPath();
                 ctx.ellipse(0, 0, 13, 15, 0, 0, Math.PI * 2);
                 ctx.fill();
                 
-                // Jaw (hanging)
                 ctx.fillStyle = '#4a5a4a';
                 ctx.save();
                 ctx.translate(0, 8);
@@ -1632,7 +1497,6 @@
                 ctx.fill();
                 ctx.restore();
                 
-                // Glowing eyes
                 ctx.fillStyle = '#ff0000';
                 ctx.shadowBlur = 15;
                 ctx.shadowColor = '#ff0000';
@@ -1642,13 +1506,11 @@
                 ctx.fill();
                 ctx.shadowBlur = 0;
                 
-                // Missing flesh holes
                 ctx.fillStyle = '#2a2a2a';
                 ctx.beginPath();
                 ctx.arc(-7, 5, 3, 0, Math.PI * 2);
                 ctx.fill();
                 
-                // Brain exposed
                 ctx.fillStyle = '#8b0000';
                 ctx.beginPath();
                 ctx.arc(0, -10, 4, 0, Math.PI, true);
@@ -1656,7 +1518,6 @@
                 
                 ctx.restore();
                 
-                // Blood stains
                 ctx.fillStyle = 'rgba(139, 0, 0, 0.7)';
                 ctx.beginPath();
                 ctx.arc(screenX + 8, screenY + 30, 6, 0, Math.PI * 2);
@@ -1680,22 +1541,18 @@
                 const screenX = this.x - camX;
                 const screenY = this.y - camY + bob;
                 
-                // Glow
                 ctx.shadowBlur = 20;
                 ctx.shadowColor = '#0f0';
                 
-                // Box
                 ctx.fillStyle = '#2c3e50';
                 ctx.fillRect(screenX - 20, screenY - 15, 40, 30);
                 
-                // Cross
                 ctx.fillStyle = '#0f0';
                 ctx.fillRect(screenX - 5, screenY - 10, 10, 20);
                 ctx.fillRect(screenX - 10, screenY - 5, 20, 10);
                 
                 ctx.shadowBlur = 0;
                 
-                // Label
                 ctx.fillStyle = '#0f0';
                 ctx.font = '10px Arial';
                 ctx.textAlign = 'center';
@@ -1703,7 +1560,6 @@
             }
         }
         
-        // Effects functions
         function createBloodExplosion(x, y, count, large = false) {
             for (let i = 0; i < count; i++) {
                 const angle = Math.random() * Math.PI * 2;
@@ -1726,14 +1582,12 @@
         }
         
         function createRifleFlash(x, y, angle) {
-            // Main flash
             for (let i = 0; i < 10; i++) {
                 const spread = (Math.random() - 0.5) * 0.5;
                 const a = angle + spread;
                 const speed = 4 + Math.random() * 5;
                 particles.push(new Particle(x, y, Math.cos(a)*speed, Math.sin(a)*speed, '#00ffff', 8, 12));
             }
-            // Smoke
             for (let i = 0; i < 5; i++) {
                 particles.push(new Particle(x, y, (Math.random()-0.5)*2, -1-Math.random(), '#888', 10, 30, 'smoke'));
             }
@@ -1751,15 +1605,6 @@
             }
         }
         
-        function createImpact(x, y, angle, type) {
-            const color = type === 'concrete' ? '#888' : '#8b4513';
-            for (let i = 0; i < 8; i++) {
-                const a = angle + (Math.random() - 0.5);
-                const speed = 2 + Math.random() * 4;
-                particles.push(new Particle(x, y, Math.cos(a)*speed, Math.sin(a)*speed, color, 4, 20));
-            }
-        }
-        
         function createDust(x, y) {
             for (let i = 0; i < 12; i++) {
                 particles.push(new Particle(x, y, (Math.random()-0.5)*4, -Math.random()*3, '#666', 8, 25, 'smoke'));
@@ -1773,33 +1618,27 @@
             setTimeout(() => el.classList.remove('show'), 2000);
         }
         
-        // Level generation
         function generateLevel() {
             platforms = [];
             spawnPoints = [];
             healthPacks = [];
             
-            // Ground platforms (raised sections)
             for (let x = 500; x < WORLD_WIDTH; x += 800 + Math.random() * 600) {
                 const w = 200 + Math.random() * 300;
-                const h = 20;
                 const y = GROUND_Y - 80 - Math.random() * 100;
-                platforms.push({ x, y, w, h });
+                platforms.push({ x, y, w, h: 20 });
             }
             
-            // Higher platforms
             for (let x = 300; x < WORLD_WIDTH; x += 1200 + Math.random() * 800) {
                 const w = 150 + Math.random() * 200;
                 const y = GROUND_Y - 200 - Math.random() * 150;
-                platforms.push({ x, y, w: w, h: 15 });
+                platforms.push({ x, y, w, h: 15 });
             }
             
-            // Spawn points for zombies (clusters)
             for (let x = 800; x < WORLD_WIDTH; x += 400 + Math.random() * 300) {
                 spawnPoints.push({ x, types: ['normal', 'normal', Math.random() > 0.7 ? 'fast' : 'normal'] });
             }
             
-            // Health packs
             for (let i = 0; i < 15; i++) {
                 const x = 1000 + Math.random() * (WORLD_WIDTH - 2000);
                 const y = GROUND_Y - 50 - Math.random() * 300;
@@ -1807,7 +1646,6 @@
             }
         }
         
-        // UI Updates
         function updateWeaponHUD() {
             const w = player.currentWeapon;
             const ammo = w.getAmmoDisplay();
@@ -1832,19 +1670,15 @@
             const pct = Math.max(0, player.health / player.maxHealth * 100);
             document.getElementById('healthFill').style.width = pct + '%';
             document.getElementById('healthText').textContent = `${Math.ceil(player.health)}/${player.maxHealth}`;
-            document.getElementById('armorFill').style.width = (player.armor / 100 * 100) + '%';
         }
         
-        // Game loop
         function update() {
             if (!gameRunning || gamePaused) return;
             
             gameTime++;
             
-            // Screen shake decay
             if (screenShake > 0) screenShake *= 0.9;
             
-            // Spawn zombies from spawn points
             spawnPoints.forEach(sp => {
                 if (Math.abs(player.x - sp.x) < 500 && Math.random() < 0.02) {
                     const type = sp.types[Math.floor(Math.random() * sp.types.length)];
@@ -1852,7 +1686,6 @@
                 }
             });
             
-            // Random spawns ahead
             if (Math.random() < 0.01 + wave * 0.002) {
                 const spawnX = player.x + 600 + Math.random() * 400;
                 if (spawnX < WORLD_WIDTH) {
@@ -1862,9 +1695,23 @@
             
             player.update();
             
-            // Update entities
             bullets = bullets.filter(b => {
                 b.update();
+                
+                zombies.forEach(z => {
+                    if (!b.active || !z.active) return;
+                    const dx = b.x - z.x;
+                    const dy = b.y - (z.y + z.height/2);
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    
+                    if (dist < z.width/2 + 5) {
+                        const headDist = Math.sqrt(dx*dx + (dy + 25)*(dy + 25));
+                        z.takeDamage(b.damage, headDist < 15);
+                        b.active = false;
+                        createBloodExplosion(b.x, b.y, 5);
+                    }
+                });
+                
                 return b.active;
             });
             
@@ -1890,10 +1737,10 @@
             
             healthPacks.forEach(h => h.update());
             
-            // Distance tracking
+            document.getElementById('score').textContent = score;
+            document.getElementById('wave').textContent = wave;
             document.getElementById('distance').textContent = Math.floor(player.x / 10);
             
-            // Auto-save every 30 seconds
             if (Date.now() - lastSaveTime > 30000) {
                 autoSave();
             }
@@ -1903,69 +1750,83 @@
             ctx.fillStyle = '#050505';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Shake
             ctx.save();
             if (screenShake > 0) {
                 ctx.translate((Math.random()-0.5)*screenShake, (Math.random()-0.5)*screenShake);
             }
             
             // Background
-            drawBackground();
+            const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            grad.addColorStop(0, '#020205');
+            grad.addColorStop(0.4, '#0a0a15');
+            grad.addColorStop(1, '#1a1a2e');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // World-space objects
+            ctx.fillStyle = '#fff';
+            for (let i = 0; i < 150; i++) {
+                const x = ((i * 137.5 + camera.x * 0.05) % canvas.width);
+                const y = (i * 71.3) % (canvas.height * 0.5);
+                ctx.globalAlpha = 0.3 + Math.random() * 0.7;
+                ctx.fillRect(x, y, 1, 1);
+            }
+            ctx.globalAlpha = 1;
+            
+            ctx.save();
+            ctx.shadowBlur = 80;
+            ctx.shadowColor = '#f4d03f';
+            ctx.fillStyle = '#f4d03f';
+            ctx.beginPath();
+            ctx.arc(canvas.width - 200, 150, 60, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+            
+            ctx.fillStyle = '#0a0a12';
+            for (let i = 0; i < 40; i++) {
+                const h = 100 + Math.sin(i * 123) * 80;
+                const w = 80 + Math.sin(i * 67) * 50;
+                const x = ((i * 250 - camera.x * 0.1) % (canvas.width + 300)) - 150;
+                ctx.fillRect(x, canvas.height - 300 - h, w, h);
+            }
+            
             const cx = camera.x;
             const cy = camera.y;
             
-            // Platforms
-            ctx.fillStyle = '#2a2a2a';
             platforms.forEach(p => {
                 if (p.x - cx > -100 && p.x - cx < canvas.width + 100) {
+                    ctx.fillStyle = '#2a2a2a';
                     ctx.fillRect(p.x - cx, p.y - cy, p.w, p.h);
-                    // Detail
                     ctx.fillStyle = '#3a3a3a';
                     ctx.fillRect(p.x - cx, p.y - cy, p.w, 3);
-                    ctx.fillStyle = '#2a2a2a';
                 }
             });
             
-            // Ground
             const groundGrad = ctx.createLinearGradient(0, GROUND_Y - cy, 0, canvas.height);
             groundGrad.addColorStop(0, '#1a1a1a');
             groundGrad.addColorStop(1, '#0a0a0a');
             ctx.fillStyle = groundGrad;
             ctx.fillRect(0, GROUND_Y - cy, canvas.width, canvas.height - (GROUND_Y - cy));
             
-            // Casings
             casings.forEach(c => c.draw(ctx, cx, cy));
-            
-            // Magazines
             magazines.forEach(m => m.draw(ctx, cx, cy));
-            
-            // Health packs
             healthPacks.forEach(h => h.draw(ctx, cx, cy));
             
-            // Particles behind
             particles.forEach(p => {
                 if (p.y > player.y) p.draw(ctx, cx, cy);
             });
             
-            // Zombies sorted by Y
-            [...zombies, player].sort((a, b) => a.y - b.y).forEach(e => {
-                if (e === player) e.draw(ctx, cx, cy);
-                else e.draw(ctx, cx, cy);
-            });
+            const entities = [...zombies];
+            if (gameRunning) entities.push(player);
+            entities.sort((a, b) => a.y - b.y).forEach(e => e.draw(ctx, cx, cy));
             
-            // Bullets
             bullets.forEach(b => b.draw(ctx, cx, cy));
             
-            // Particles front
             particles.forEach(p => {
                 if (p.y <= player.y) p.draw(ctx, cx, cy);
             });
             
             ctx.restore();
             
-            // Crosshair
             if (gameRunning && !gamePaused) {
                 ctx.strokeStyle = '#0f0';
                 ctx.lineWidth = 2;
@@ -1980,52 +1841,6 @@
                 ctx.strokeStyle = 'rgba(0, 255, 0, 0.3)';
                 ctx.stroke();
             }
-            
-            // Pause overlay
-            if (gamePaused) {
-                ctx.fillStyle = 'rgba(0,0,0,0.5)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-            }
-        }
-        
-        function drawBackground() {
-            // Sky gradient
-            const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            grad.addColorStop(0, '#020205');
-            grad.addColorStop(0.4, '#0a0a15');
-            grad.addColorStop(1, '#1a1a2e');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Stars
-            ctx.fillStyle = '#fff';
-            for (let i = 0; i < 150; i++) {
-                const x = ((i * 137.5 + camera.x * 0.05) % canvas.width);
-                const y = (i * 71.3) % (canvas.height * 0.5);
-                const size = Math.random() * 1.5;
-                ctx.globalAlpha = 0.3 + Math.random() * 0.7;
-                ctx.fillRect(x, y, size, size);
-            }
-            ctx.globalAlpha = 1;
-            
-            // Moon
-            ctx.save();
-            ctx.shadowBlur = 80;
-            ctx.shadowColor = '#f4d03f';
-            ctx.fillStyle = '#f4d03f';
-            ctx.beginPath();
-            ctx.arc(canvas.width - 200, 150, 60, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-            
-            // Parallax city
-            ctx.fillStyle = '#0a0a12';
-            for (let i = 0; i < 40; i++) {
-                const h = 100 + Math.sin(i * 123) * 80;
-                const w = 80 + Math.sin(i * 67) * 50;
-                const x = ((i * 250 - camera.x * 0.1) % (canvas.width + 300)) - 150;
-                ctx.fillRect(x, canvas.height - 300 - h, w, h);
-            }
         }
         
         function gameLoop() {
@@ -2034,7 +1849,6 @@
             requestAnimationFrame(gameLoop);
         }
         
-        // Save/Load system
         function saveGame() {
             const saveData = {
                 player: {
@@ -2069,14 +1883,12 @@
             
             const data = JSON.parse(saveData);
             
-            // Initialize game
             generateLevel();
             player = new Player(data.player.x, data.player.y);
             player.health = data.player.health;
             player.armor = data.player.armor;
             player.currentWeaponIdx = data.player.currentWeapon;
             
-            // Restore weapon states
             data.player.weapons.forEach((w, i) => {
                 if (player.weapons[i]) {
                     player.weapons[i].currentMag = w.currentMag;
@@ -2118,7 +1930,6 @@
             }
         }
         
-        // Game control functions
         function startGame(newGame = true) {
             if (newGame) {
                 generateLevel();
@@ -2167,6 +1978,7 @@
             gamePaused = false;
             document.getElementById('pauseScreen').style.display = 'none';
             document.getElementById('startScreen').style.display = 'flex';
+            document.getElementById('loadBtn').style.display = 'block';
         }
         
         function endGame() {
@@ -2176,8 +1988,6 @@
             document.getElementById('finalKills').textContent = totalKills;
             document.getElementById('finalDistance').textContent = Math.floor(player.x / 10);
             document.getElementById('gameOverScreen').style.display = 'flex';
-            
-            // Clear save on death
             localStorage.removeItem('deadRunSave');
         }
         
@@ -2188,18 +1998,15 @@
         function backToMenu() {
             document.getElementById('gameOverScreen').style.display = 'none';
             document.getElementById('startScreen').style.display = 'flex';
+            const hasSave = localStorage.getItem('deadRunSave');
+            document.getElementById('loadBtn').style.display = hasSave ? 'block' : 'none';
         }
         
-        // Check for existing save on load
         window.onload = () => {
             const hasSave = localStorage.getItem('deadRunSave');
             document.getElementById('loadBtn').style.display = hasSave ? 'block' : 'none';
-            if (!hasSave) {
-                document.getElementById('loadBtn').style.display = 'none';
-            }
         };
         
-        // Start
         gameLoop();
     </script>
 </body>
