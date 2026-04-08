@@ -32,10 +32,10 @@
   .wcard .val { font-size: clamp(24px,4vw,36px); font-weight: 600; line-height: 1; }
   .wcard .unit { font-size: clamp(14px,2.5vw,20px); }
 
-  .cg  { background:#0d2b1a; border:1px solid #2ea04340; } .cg  .lbl{color:#3fb950}  .cg  .val{color:#fff}
+  .cg  { background:#0d2b1a; border:1px solid #2ea04340; } .cg  .lbl{color:#3fb950}  .cg  .val{color:#3fb950}
   .cr  { background:#2b0d0d; border:1px solid #f8514940; } .cr  .lbl{color:#f85149}  .cr  .val{color:#f85149}
   .co  { background:#2b1d0a; border:1px solid #d2992240; } .co  .lbl{color:#e3b341}  .co  .val{color:#e3b341}
-  .cb  { background:#0d1f35; border:1px solid #58a6ff40; } .cb  .lbl{color:#58a6ff}  .cb  .val{color:#fff}
+  .cb  { background:#0d1f35; border:1px solid #58a6ff40; } .cb  .lbl{color:#58a6ff}  .cb  .val{color:#58a6ff}
   /* Extra row colors */
   .cp  { background:#1a0d2b; border:1px solid #a371f740; } .cp  .lbl{color:#a371f7}  .cp  .val{color:#a371f7}
   .ct  { background:#0d2526; border:1px solid #39d3d340; } .ct  .lbl{color:#39d3d3}  .ct  .val{color:#39d3d3}
@@ -92,10 +92,10 @@
 
   <!-- ════ TOP 4 STAT CARDS ════ -->
   <div class="row1">
-    <div class="scard cg"><div class="lbl">Servers Online</div><div class="val" id="v-online">128</div></div>
-    <div class="scard cr"><div class="lbl">Servers Offline</div><div class="val" id="v-offline">3</div></div>
-    <div class="scard co"><div class="lbl">CPU Usage</div><div class="val"><span id="v-cpu">68</span><span class="unit">%</span></div></div>
-    <div class="scard cb"><div class="lbl">Memory Usage</div><div class="val"><span id="v-mem">72</span><span class="unit">%</span></div></div>
+    <div class="scard cg"><div class="lbl">Good</div><div class="val" id="v-online">56,5<span class="unit">%</span></div></div>
+    <div class="scard co"><div class="lbl">Marginal</div><div class="val"><span id="v-cpu">34<span class="unit">%</span></div></div>
+    <div class="scard cr"><div class="lbl">Bad</div><div class="val" id="v-offline">9,53<span class="unit">%</span></div></div>
+    <div class="scard cb"><div class="lbl">Naprave</div><div class="val"><span id="v-mem">55.000</span></div></div>
   </div>
 
   <!-- ════ 3 WIDE CARDS: SL / RSO / SO ════ -->
@@ -149,39 +149,39 @@
 
     <!-- Network Traffic -->
     <div class="panel">
-      <div class="ptitle">Network Traffic</div>
-      <div class="netlbl" style="color:#3fb950">Inbound</div>
+      <div class="ptitle">NQI 2025 | 2026</div>
+      <div class="netlbl" style="color:#3fb950">2025</div>
       <canvas id="c-in" height="52"></canvas>
-      <div class="netlbl" style="color:#58a6ff;margin-top:8px">Outbound</div>
+      <div class="netlbl" style="color:#58a6ff;margin-top:8px">2026</div>
       <canvas id="c-out" height="52"></canvas>
     </div>
 
     <!-- Fiber Node Batteries -->
     <div class="panel">
-      <div class="ptitle">Fiber Node Batteries</div>
+      <div class="ptitle">Menjava baterij</div>
       <div class="fiber-gauges">
         <div>
-          <div class="fiber-lbl">New batteries</div>
+          <div class="fiber-lbl">UPSi z novimi baterijami</div>
           <div class="fiber-bar-wrap"><div class="fiber-bar" id="bar-new" style="background:#3fb950"></div></div>
           <div class="fiber-nums">
-            <span class="fiber-val" style="color:#3fb950" id="fn-new">72</span>
+            <span class="fiber-val" style="color:#3fb950" id="fn-new">53</span>
             <span class="fiber-max">/ <span id="fn-new-max">100</span></span>
           </div>
         </div>
         <div>
-          <div class="fiber-lbl">Batteries replaced</div>
+          <div class="fiber-lbl">Menjane baterije</div>
           <div class="fiber-bar-wrap"><div class="fiber-bar" id="bar-replaced" style="background:#58a6ff"></div></div>
           <div class="fiber-nums">
-            <span class="fiber-val" style="color:#58a6ff" id="fn-replaced">45</span>
-            <span class="fiber-max">/ <span id="fn-replaced-max">100</span></span>
+            <span class="fiber-val" style="color:#58a6ff" id="fn-replaced">159</span>
+            <span class="fiber-max">/ <span id="fn-replaced-max">325</span></span>
           </div>
         </div>
         <div>
-          <div class="fiber-lbl">Batteries in stock</div>
+          <div class="fiber-lbl">Zaloga baterij</div>
           <div class="fiber-bar-wrap"><div class="fiber-bar" id="bar-stock" style="background:#e3b341"></div></div>
           <div class="fiber-nums">
-            <span class="fiber-val" style="color:#e3b341" id="fn-stock">28</span>
-            <span class="fiber-max">/ <span id="fn-stock-max">100</span></span>
+            <span class="fiber-val" style="color:#e3b341" id="fn-stock">166</span>
+            <span class="fiber-max">/ <span id="fn-stock-max">325</span></span>
           </div>
         </div>
       </div>
@@ -209,39 +209,53 @@
 
     <!-- Database Performance — 3 gauges -->
     <div class="panel">
-      <div class="ptitle">Database Performance</div>
+      <div class="ptitle">E2E</div>
       <div class="gauge-row">
         <div class="gwrap">
-          <!-- drawGauge('g-query', VALUE, MAX, 'LABEL', COLOR) -->
-          <canvas id="g-query" width="88" height="88"></canvas>
-          <div class="glbl">Query Load</div>
+          <!-- drawGauge('g-conn', VALUE, MAX, 'LABEL', COLOR) — third gauge, change freely -->
+          <canvas id="g-conn" width="88" height="88"></canvas>
+          <div class="glbl">2025</div>
         </div>
         <div class="gwrap">
           <!-- drawGauge('g-lat', VALUE, MAX, 'LABEL', COLOR) -->
           <canvas id="g-lat" width="88" height="88"></canvas>
-          <div class="glbl">Latency</div>
+          <div class="glbl">2026</div>
         </div>
         <div class="gwrap">
-          <!-- drawGauge('g-conn', VALUE, MAX, 'LABEL', COLOR) — third gauge, change freely -->
-          <canvas id="g-conn" width="88" height="88"></canvas>
-          <div class="glbl">Connections</div>
+          <!-- drawGauge('g-query', VALUE, MAX, 'LABEL', COLOR) -->
+          <canvas id="g-query" width="88" height="88"></canvas>
+          <div class="glbl">Napredek</div>
         </div>
       </div>
     </div>
 
     <!-- Uptime -->
     <div class="panel" style="display:flex;flex-direction:column;gap:2px">
-      <div class="ptitle">Uptime</div>
-      <div class="upct" id="v-uptime">99.8%</div>
-      <div class="uplbl">Uptime</div>
+      <div class="ptitle">E2E napredek</div>
+      <div class="upct" id="v-uptime">23%</div>
+      <div class="uplbl"> </div>
       <canvas id="c-up" height="85" style="margin-top:4px"></canvas>
-      <div class="usub">Last downtime: <span id="v-down">02m 15s</span></div>
+      <div class="usub">V delu: <span id="v-down">12</span></div>
     </div>
 
   </div>
 </div>
 
 <script>
+/* ════════════════════════════════════════
+   EDITABLE DATA SECTION — Change these values
+════════════════════════════════════════ */
+
+/* ═══ NETWORK TRAFFIC DATA ═══ */
+var inoutLabels = ['w1', 'w2', 'w3', 'w4', 'w5', 'w6', 'w7', 'w8', 'w9', 'w10', 'w11', 'w12']
+var inboundData  = [20, 20, 19, 16, 17, 20, 21, 19, 16, 12, 11, 10];
+var outboundData = [10, 11, 12, 10, 9, 8];
+
+/* ═══ UPTIME DATA ═══ */
+var uptimeLabels = ['jan','feb','mar','apr'];
+var uptimeData   = [1, 3, 9, 16];
+
+
 /* ════════════════════════════════════════
    FIBER BARS — change VALUE and MAX
 ════════════════════════════════════════ */
@@ -250,30 +264,24 @@ function setFiberBar(barId, valId, maxId, value, max) {
   document.getElementById(maxId).textContent = max;
   document.getElementById(barId).style.width = Math.min(100, Math.round(value / max * 100)) + '%';
 }
-setFiberBar('bar-new',      'fn-new',      'fn-new-max',      72, 100);
-setFiberBar('bar-replaced', 'fn-replaced', 'fn-replaced-max', 45, 100);
-setFiberBar('bar-stock',    'fn-stock',    'fn-stock-max',    28, 100);
+setFiberBar('bar-new',      'fn-new',      'fn-new-max',      53, 100);
+setFiberBar('bar-replaced', 'fn-replaced', 'fn-replaced-max', 159, 325);
+setFiberBar('bar-stock',    'fn-stock',    'fn-stock-max',    166, 325);
 
 
 /* ════════════════════════════════════════
    SPARKLINES (inbound / outbound)
 ════════════════════════════════════════ */
-function rnd(base, spread, n) {
-  return Array.from({length: n}, () => Math.round(base + (Math.random() - 0.5) * spread));
-}
-
 Chart.defaults.color = '#8b949e';
 Chart.defaults.borderColor = '#21262d';
-
-var inData  = rnd(55, 40, 30);
-var outData = rnd(35, 35, 30);
 
 function sparkline(id, color, data, unit) {
   unit = unit || '';
   new Chart(document.getElementById(id), {
     type: 'line',
     data: {
-      labels: data.map((_, i) => '' + (data.length - i)),
+      /*labels: data.map((_, i) => '' + (data.length - i)),*/
+      labels: inoutLabels,
       datasets: [{ data, borderColor: color, backgroundColor: color + '28', borderWidth: 1.5, pointRadius: 0, pointHoverRadius: 4, pointHoverBackgroundColor: color, fill: true, tension: 0.4 }]
     },
     options: {
@@ -288,7 +296,7 @@ function sparkline(id, color, data, unit) {
           borderWidth: 1,
           titleColor: '#8b949e',
           bodyColor: color,
-          callbacks: { label: ctx => ' ' + ctx.parsed.y + unit }
+          callbacks: { label: ctx => '  ' + ctx.parsed.y + unit }
         }
       },
       scales: { x: { display: false }, y: { display: false, min: 0 } },
@@ -297,16 +305,13 @@ function sparkline(id, color, data, unit) {
   });
 }
 
-sparkline('c-in',  '#3fb950', inData,  ' ');
-sparkline('c-out', '#58a6ff', outData, ' ');
+sparkline('c-in',  '#3fb950', inboundData,  ' % ');
+sparkline('c-out', '#58a6ff', outboundData, ' % ');
 
 
 /* ════════════════════════════════════════
    UPTIME CHART
 ════════════════════════════════════════ */
-var uptimeLabels = ['00:00','02:00','04:00','06:00','08:00','10:00','12:00','14:00','16:00','18:00','20:00','22:00','24:00'];
-var uptimeData   = [97, 98.5, 99, 98, 99.2, 99.5, 99.8, 99.6, 99.9, 99.8, 100, 99.8, 99.8];
-
 new Chart(document.getElementById('c-up'), {
   type: 'line',
   data: {
@@ -335,12 +340,12 @@ new Chart(document.getElementById('c-up'), {
         borderWidth: 1,
         titleColor: '#8b949e',
         bodyColor: '#3fb950',
-        callbacks: { label: ctx => ' ' + ctx.parsed.y + '%' }
+        callbacks: { label: ctx => ' ' + ctx.parsed.y + ' ' }
       }
     },
     scales: {
       x: { display: true, ticks: { color: '#8b949e', font: { size: 9 }, maxRotation: 0, maxTicksLimit: 7 }, grid: { color: '#21262d' } },
-      y: { display: true, min: 95, max: 100, ticks: { color: '#8b949e', font: { size: 9 }, maxTicksLimit: 4, callback: v => v + '%' }, grid: { color: '#21262d55' } }
+      y: { display: false, min: 0, max: 20, ticks: { color: '#8b949e', font: { size: 9 }, maxTicksLimit: 4, callback: v => v + ' ' }, grid: { color: '#21262d55' } }
     },
     animation: false
   }
@@ -378,9 +383,9 @@ drawGauge('g-seg25', 100, 100, '20',    '#2937d6');
 drawGauge('g-seg26',  50, 100, '12',    '#298dd6');
 
 /* Database Performance — 3 gauges */
-drawGauge('g-query',  85, 100, '85%',   '#d29922');   /* Query load  — change 85       */
-drawGauge('g-lat',   120, 200, '120ms', '#e3b341');   /* Latency     — change 120      */
-drawGauge('g-conn',   64, 100, '64%',   '#3fb950');   /* Connections — change 64 / 100 */
+drawGauge('g-query',  23, 100, '23%',   '#d29922');   /* Query load  — change 85       */
+drawGauge('g-lat',   16, 60, '16', '#e3b341');   /* Latency     — change 120      */
+drawGauge('g-conn',   24, 24, '24',   '#3fb950');   /* Connections — change 64 / 100 */
 </script>
 </body>
 </html>
