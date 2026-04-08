@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KPI DASHBOARD</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #090d12; min-height: 100vh; padding: 16px; font-family: Arial, sans-serif; display: flex; justify-content: center; }
+  #dash { background: #0d1117; color: #e6edf3; padding: 16px; border-radius: 12px; width: 100%; max-width: 1100px; }
+
+  .dash-title { text-align: center; font-size: clamp(14px,3vw,22px); font-weight: 600; letter-spacing: 3px; margin-bottom: 14px; }
+  .dash-title span { color: #3fb950; }
+
+  /* ── Grids ── */
+  .row1  { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 10px; }
+  .row1b { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 10px; }
+  .row-wide { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 10px; }
+  .row2  { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 10px; }
+  .row3  { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 10px; }
+
+  /* ── Stat cards ── */
+  .scard { border-radius: 8px; padding: 12px 14px; }
+  .scard .lbl { font-size: clamp(9px,1.5vw,11px); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+  .scard .val { font-size: clamp(22px,4vw,32px); font-weight: 600; line-height: 1; }
+  .scard .unit { font-size: clamp(14px,2.5vw,18px); }
+
+  /* Wide stat cards */
+  .wcard { border-radius: 8px; padding: 14px 20px; }
+  .wcard .lbl { font-size: clamp(9px,1.5vw,11px); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+  .wcard .val { font-size: clamp(24px,4vw,36px); font-weight: 600; line-height: 1; }
+  .wcard .unit { font-size: clamp(14px,2.5vw,20px); }
+
+  .cg  { background:#0d2b1a; border:1px solid #2ea04340; } .cg  .lbl{color:#3fb950}  .cg  .val{color:#fff}
+  .cr  { background:#2b0d0d; border:1px solid #f8514940; } .cr  .lbl{color:#f85149}  .cr  .val{color:#f85149}
+  .co  { background:#2b1d0a; border:1px solid #d2992240; } .co  .lbl{color:#e3b341}  .co  .val{color:#e3b341}
+  .cb  { background:#0d1f35; border:1px solid #58a6ff40; } .cb  .lbl{color:#58a6ff}  .cb  .val{color:#fff}
+  /* Extra row colors */
+  .cp  { background:#1a0d2b; border:1px solid #a371f740; } .cp  .lbl{color:#a371f7}  .cp  .val{color:#a371f7}
+  .ct  { background:#0d2526; border:1px solid #39d3d340; } .ct  .lbl{color:#39d3d3}  .ct  .val{color:#39d3d3}
+  .cdr { background:#1e0a0a; border:1px solid #c0392b40; } .cdr .lbl{color:#e74c3c}  .cdr .val{color:#e74c3c}
+  .cgr { background:#0a1e0f; border:1px solid #27ae6040; } .cgr .lbl{color:#2ecc71}  .cgr .val{color:#2ecc71}
+  /* Wide SL / RSO / SO */
+  .csl { background:#1a1a0d; border:1px solid #f0e04040; } .csl .lbl{color:#f0e040}  .csl .val{color:#f0e040}
+  .crs { background:#0d1a1a; border:1px solid #40c0f040; } .crs .lbl{color:#40c0f0}  .crs .val{color:#40c0f0}
+  .cso { background:#1a0d1a; border:1px solid #e040fb40; } .cso .lbl{color:#e040fb}  .cso .val{color:#e040fb}
+
+  /* ── Panels ── */
+  .panel { background:#161b22; border:1px solid #30363d; border-radius:8px; padding:12px 14px; }
+  .ptitle { font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#8b949e; margin-bottom:10px; }
+
+  /* ── Health ── */
+  .hrow { display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size:13px; font-weight:500; }
+  .hrow .hnum { margin-left:auto; font-size:16px; }
+  .hdot { width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; }
+
+  /* ── Network ── */
+  .netlbl { font-size:10px; letter-spacing:1px; font-weight:600; text-transform:uppercase; margin-bottom:2px; }
+
+  /* ── Fiber battery bars ── */
+  .fiber-gauges { display:flex; flex-direction:column; gap:12px; }
+  .fiber-lbl { font-size:11px; color:#8b949e; margin-bottom:4px; }
+  .fiber-bar-wrap { background:#21262d; border-radius:4px; height:14px; width:100%; overflow:hidden; }
+  .fiber-bar { height:100%; border-radius:4px; }
+  .fiber-nums { display:flex; justify-content:space-between; align-items:baseline; margin-top:2px; }
+  .fiber-val { font-size:14px; font-weight:600; }
+  .fiber-max { font-size:11px; color:#8b949e; }
+
+  /* ── DB + Segmentacije gauges ── */
+  .gauge-row { display:flex; gap:6px; justify-content:center; align-items:center; margin-top:4px; flex-wrap:wrap; }
+  .gwrap { text-align:center; }
+  .glbl { font-size:10px; color:#8b949e; letter-spacing:1px; text-transform:uppercase; margin-top:3px; }
+
+  /* ── Uptime ── */
+  .upct { font-size:clamp(20px,3vw,26px); font-weight:600; color:#3fb950; }
+  .uplbl { font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:#8b949e; margin-bottom:6px; }
+  .usub { font-size:11px; color:#8b949e; margin-top:4px; }
+  .usub span { color:#e6edf3; }
+
+  /* ── Responsive ── */
+  @media (max-width:700px) {
+    .row1,.row1b { grid-template-columns:repeat(2,1fr); }
+    .row-wide,.row2,.row3 { grid-template-columns:1fr; }
+  }
+  @media (max-width:380px) { #dash{padding:10px} body{padding:8px} }
+</style>
+</head>
+<body>
+<div id="dash">
+  <div class="dash-title">KPI STATUS <span>REGIJA 2</span></div>
+
+  <!-- ════ TOP 4 STAT CARDS ════ -->
+  <div class="row1">
+    <div class="scard cg"><div class="lbl">Servers Online</div><div class="val" id="v-online">128</div></div>
+    <div class="scard cr"><div class="lbl">Servers Offline</div><div class="val" id="v-offline">3</div></div>
+    <div class="scard co"><div class="lbl">CPU Usage</div><div class="val"><span id="v-cpu">68</span><span class="unit">%</span></div></div>
+    <div class="scard cb"><div class="lbl">Memory Usage</div><div class="val"><span id="v-mem">72</span><span class="unit">%</span></div></div>
+  </div>
+
+  <!-- ════ 3 WIDE CARDS: SL / RSO / SO ════ -->
+  <div class="row-wide">
+    <div class="wcard csl">
+      <div class="lbl">SL</div>
+      <div class="val" id="v-sl">80,9<span class="unit">%</span></div>
+    </div>
+    <div class="wcard cso">
+      <div class="lbl">RSO</div>
+      <div class="val" id="v-so">10,1<span class="unit">%</span></div>
+    </div>
+    <div class="wcard crs">
+      <div class="lbl">SO #</div>
+      <div class="val" id="v-rso">220</div>
+    </div>
+  </div>
+
+  <!-- ════ MIDDLE ROW ════ -->
+  <div class="row2">
+
+    <!-- System Health -->
+    <div class="panel">
+      <div class="ptitle">System Health</div>
+      <div class="hrow">
+        <div class="hdot" style="background:#3fb950;color:#0d2b1a">✓</div>
+        <span style="color:#3fb950">Ocena 5</span>
+        <span class="hnum" style="color:#3fb950" id="v-op">240</span>
+      </div>
+      <div class="hrow">
+        <div class="hdot" style="background:#27864f;color:#0a1e14">✓</div>
+        <span style="color:#2ecc71">Ocena 4</span>
+        <span class="hnum" style="color:#2ecc71" id="v-mon">18</span>
+      </div>
+      <div class="hrow">
+        <div class="hdot" style="background:#d29922;color:#2b1d0a">!</div>
+        <span style="color:#e3b341">Ocena 3</span>
+        <span class="hnum" style="color:#e3b341" id="v-iss">4</span>
+      </div>
+      <div class="hrow">
+        <div class="hdot" style="background:#f85149;color:#2b0d0d">⚠</div>
+        <span style="color:#f85149">Ocena 2</span>
+        <span class="hnum" style="color:#f85149" id="v-crit">2</span>
+      </div>
+      <div class="hrow">
+        <div class="hdot" style="background:#8b1a1a;color:#1e0505">✕</div>
+        <span style="color:#c0392b">Ocena 1</span>
+        <span class="hnum" style="color:#c0392b" id="v-fail">7</span>
+      </div>
+    </div>
+
+    <!-- Network Traffic -->
+    <div class="panel">
+      <div class="ptitle">Network Traffic</div>
+      <div class="netlbl" style="color:#3fb950">Inbound</div>
+      <canvas id="c-in" height="52"></canvas>
+      <div class="netlbl" style="color:#58a6ff;margin-top:8px">Outbound</div>
+      <canvas id="c-out" height="52"></canvas>
+    </div>
+
+    <!-- Fiber Node Batteries -->
+    <div class="panel">
+      <div class="ptitle">Fiber Node Batteries</div>
+      <div class="fiber-gauges">
+        <div>
+          <div class="fiber-lbl">New batteries</div>
+          <div class="fiber-bar-wrap"><div class="fiber-bar" id="bar-new" style="background:#3fb950"></div></div>
+          <div class="fiber-nums">
+            <span class="fiber-val" style="color:#3fb950" id="fn-new">72</span>
+            <span class="fiber-max">/ <span id="fn-new-max">100</span></span>
+          </div>
+        </div>
+        <div>
+          <div class="fiber-lbl">Batteries replaced</div>
+          <div class="fiber-bar-wrap"><div class="fiber-bar" id="bar-replaced" style="background:#58a6ff"></div></div>
+          <div class="fiber-nums">
+            <span class="fiber-val" style="color:#58a6ff" id="fn-replaced">45</span>
+            <span class="fiber-max">/ <span id="fn-replaced-max">100</span></span>
+          </div>
+        </div>
+        <div>
+          <div class="fiber-lbl">Batteries in stock</div>
+          <div class="fiber-bar-wrap"><div class="fiber-bar" id="bar-stock" style="background:#e3b341"></div></div>
+          <div class="fiber-nums">
+            <span class="fiber-val" style="color:#e3b341" id="fn-stock">28</span>
+            <span class="fiber-max">/ <span id="fn-stock-max">100</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ════ BOTTOM ROW ════ -->
+  <div class="row3">
+
+    <!-- Segmentacije Gauges -->
+    <div class="panel">
+      <div class="ptitle">Segmentacije</div>
+      <div class="gauge-row">
+        <div class="gwrap">
+          <canvas id="g-seg25" width="105" height="105"></canvas>
+          <div class="glbl">2025</div>
+        </div>
+        <div class="gwrap">
+          <canvas id="g-seg26" width="105" height="105"></canvas>
+          <div class="glbl">2026</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Database Performance — 3 gauges -->
+    <div class="panel">
+      <div class="ptitle">Database Performance</div>
+      <div class="gauge-row">
+        <div class="gwrap">
+          <!-- drawGauge('g-query', VALUE, MAX, 'LABEL', COLOR) -->
+          <canvas id="g-query" width="88" height="88"></canvas>
+          <div class="glbl">Query Load</div>
+        </div>
+        <div class="gwrap">
+          <!-- drawGauge('g-lat', VALUE, MAX, 'LABEL', COLOR) -->
+          <canvas id="g-lat" width="88" height="88"></canvas>
+          <div class="glbl">Latency</div>
+        </div>
+        <div class="gwrap">
+          <!-- drawGauge('g-conn', VALUE, MAX, 'LABEL', COLOR) — third gauge, change freely -->
+          <canvas id="g-conn" width="88" height="88"></canvas>
+          <div class="glbl">Connections</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Uptime -->
+    <div class="panel" style="display:flex;flex-direction:column;gap:2px">
+      <div class="ptitle">Uptime</div>
+      <div class="upct" id="v-uptime">99.8%</div>
+      <div class="uplbl">Uptime</div>
+      <canvas id="c-up" height="85" style="margin-top:4px"></canvas>
+      <div class="usub">Last downtime: <span id="v-down">02m 15s</span></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════
+   FIBER BARS — change VALUE and MAX
+════════════════════════════════════════ */
+function setFiberBar(barId, valId, maxId, value, max) {
+  document.getElementById(valId).textContent = value;
+  document.getElementById(maxId).textContent = max;
+  document.getElementById(barId).style.width = Math.min(100, Math.round(value / max * 100)) + '%';
+}
+setFiberBar('bar-new',      'fn-new',      'fn-new-max',      72, 100);
+setFiberBar('bar-replaced', 'fn-replaced', 'fn-replaced-max', 45, 100);
+setFiberBar('bar-stock',    'fn-stock',    'fn-stock-max',    28, 100);
+
+
+/* ════════════════════════════════════════
+   SPARKLINES (inbound / outbound)
+════════════════════════════════════════ */
+function rnd(base, spread, n) {
+  return Array.from({length: n}, () => Math.round(base + (Math.random() - 0.5) * spread));
+}
+
+Chart.defaults.color = '#8b949e';
+Chart.defaults.borderColor = '#21262d';
+
+var inData  = rnd(55, 40, 30);
+var outData = rnd(35, 35, 30);
+
+function sparkline(id, color, data, unit) {
+  unit = unit || '';
+  new Chart(document.getElementById(id), {
+    type: 'line',
+    data: {
+      labels: data.map((_, i) => '' + (data.length - i)),
+      datasets: [{ data, borderColor: color, backgroundColor: color + '28', borderWidth: 1.5, pointRadius: 0, pointHoverRadius: 4, pointHoverBackgroundColor: color, fill: true, tension: 0.4 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          enabled: true,
+          backgroundColor: '#1c2128',
+          borderColor: '#30363d',
+          borderWidth: 1,
+          titleColor: '#8b949e',
+          bodyColor: color,
+          callbacks: { label: ctx => ' ' + ctx.parsed.y + unit }
+        }
+      },
+      scales: { x: { display: false }, y: { display: false, min: 0 } },
+      animation: false
+    }
+  });
+}
+
+sparkline('c-in',  '#3fb950', inData,  ' ');
+sparkline('c-out', '#58a6ff', outData, ' ');
+
+
+/* ════════════════════════════════════════
+   UPTIME CHART
+════════════════════════════════════════ */
+var uptimeLabels = ['00:00','02:00','04:00','06:00','08:00','10:00','12:00','14:00','16:00','18:00','20:00','22:00','24:00'];
+var uptimeData   = [97, 98.5, 99, 98, 99.2, 99.5, 99.8, 99.6, 99.9, 99.8, 100, 99.8, 99.8];
+
+new Chart(document.getElementById('c-up'), {
+  type: 'line',
+  data: {
+    labels: uptimeLabels,
+    datasets: [{
+      data: uptimeData,
+      borderColor: '#3fb950',
+      backgroundColor: '#3fb95028',
+      borderWidth: 1.5,
+      pointRadius: 2,
+      pointHoverRadius: 5,
+      pointBackgroundColor: '#3fb950',
+      fill: true,
+      tension: 0.4
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: true,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        enabled: true,
+        backgroundColor: '#1c2128',
+        borderColor: '#30363d',
+        borderWidth: 1,
+        titleColor: '#8b949e',
+        bodyColor: '#3fb950',
+        callbacks: { label: ctx => ' ' + ctx.parsed.y + '%' }
+      }
+    },
+    scales: {
+      x: { display: true, ticks: { color: '#8b949e', font: { size: 9 }, maxRotation: 0, maxTicksLimit: 7 }, grid: { color: '#21262d' } },
+      y: { display: true, min: 95, max: 100, ticks: { color: '#8b949e', font: { size: 9 }, maxTicksLimit: 4, callback: v => v + '%' }, grid: { color: '#21262d55' } }
+    },
+    animation: false
+  }
+});
+
+
+/* ════════════════════════════════════════
+   CIRCULAR GAUGES
+   drawGauge(canvasId, value, maxValue, label, color)
+════════════════════════════════════════ */
+function drawGauge(id, value, maxVal, label, color) {
+  var canvas = document.getElementById(id);
+  if (!canvas) return;
+  var dpr = window.devicePixelRatio || 1;
+  var W = canvas.width, H = canvas.height;
+  canvas.width  = W * dpr; canvas.height = H * dpr;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  var ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  var cx = W/2, cy = H/2 + 8, r = Math.min(W, H) * 0.33;
+  var startA = Math.PI * 0.8, endA = Math.PI * 2.2;
+  var fillA  = startA + (endA - startA) * Math.min(1, value / maxVal);
+  ctx.beginPath(); ctx.arc(cx, cy, r, startA, endA);
+  ctx.strokeStyle = '#21262d'; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx, cy, r, startA, fillA);
+  ctx.strokeStyle = color; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.stroke();
+  ctx.fillStyle = color;
+  ctx.font = 'bold 13px Arial';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(label, cx, cy);
+}
+
+/* Segmentacije 2025 / 2026 */
+drawGauge('g-seg25', 100, 100, '20',    '#2937d6');
+drawGauge('g-seg26',  50, 100, '12',    '#298dd6');
+
+/* Database Performance — 3 gauges */
+drawGauge('g-query',  85, 100, '85%',   '#d29922');   /* Query load  — change 85       */
+drawGauge('g-lat',   120, 200, '120ms', '#e3b341');   /* Latency     — change 120      */
+drawGauge('g-conn',   64, 100, '64%',   '#3fb950');   /* Connections — change 64 / 100 */
+</script>
+</body>
+</html>
