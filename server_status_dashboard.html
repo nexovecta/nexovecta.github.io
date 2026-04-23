@@ -1,1 +1,1611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>StormNet — Center za upravljanje izpadov</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #111827;
+            --bg-card: #111827;
+            --bg-hover: #1f2937;
+            --bg-header: #0a0e17;
+            --text-primary: #f1f5f9;
+            --text-secondary: #6b7280;
+            --text-muted: #4b5563;
+            --accent: #f97316;
+            --accent-hover: #ea580c;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --purple: #a855f7;
+            --border: #1f2937;
+            --border-light: #374151;
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            font-size: 16px;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .top-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: var(--bg-header);
+            border-bottom: 1px solid var(--border);
+            padding: 0 1rem;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            min-width: 0;
+        }
+
+        .header-logo {
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            flex-shrink: 0;
+        }
+
+        .header-logo svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .header-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            font-weight: 400;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .header-nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: color 0.2s;
+            white-space: nowrap;
+        }
+
+        .header-nav a:hover {
+            color: var(--text-primary);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-top: 52px;
+            padding: 1rem;
+            max-width: 1400px;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-banner {
+            margin-bottom: 1.5rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hero-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .hero-label {
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 0.25rem;
+        }
+
+        .hero-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            line-height: 1.2;
+        }
+
+        .hero-title span {
+            color: var(--accent);
+        }
+
+        .hero-right {
+            text-align: right;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            max-width: 260px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 1.25rem;
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.25rem;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            position: relative;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .tab-btn.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 16px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        .stat-trend {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+        }
+
+        .chart-card h3 {
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .table-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .table-header h2 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .table-header h2::before {
+            content: '';
+            width: 3px;
+            height: 16px;
+            background: var(--accent);
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .record-count {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+        }
+
+        .btn {
+            padding: 0.5rem 0.875rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-light);
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            white-space: nowrap;
+            touch-action: manipulation;
+        }
+
+        .btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-success {
+            background: transparent;
+            border-color: var(--border-light);
+            color: var(--text-secondary);
+        }
+
+        .btn-success:hover {
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .filters {
+            display: flex;
+            gap: 0.75rem;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            flex: 1;
+            min-width: 130px;
+            max-width: 200px;
+        }
+
+        .filter-group label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .date-dropdown {
+            position: relative;
+            width: 100%;
+        }
+
+        .date-dropdown-toggle {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            padding: 0.5rem 0.625rem;
+            color: var(--text-primary);
+            font-size: 0.8rem;
+            width: 100%;
+            font-family: inherit;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            min-height: 36px;
+        }
+
+        .date-dropdown-toggle:hover {
+            border-color: var(--accent);
+        }
+
+        .date-dropdown-toggle svg {
+            flex-shrink: 0;
+            color: var(--text-muted);
+        }
+
+        .date-dropdown-menu {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            padding: 0.75rem;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            min-width: 280px;
+        }
+
+        .date-dropdown-menu.active {
+            display: block;
+        }
+
+        .date-calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .date-calendar-header button {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            font-size: 1rem;
+        }
+
+        .date-calendar-header span {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .date-calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            text-align: center;
+        }
+
+        .date-calendar-grid .day-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            padding: 0.35rem 0;
+            text-transform: uppercase;
+        }
+
+        .date-calendar-grid .day-cell {
+            padding: 0.5rem 0.25rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+            border-radius: 4px;
+            color: var(--text-primary);
+            transition: background 0.15s;
+        }
+
+        .date-calendar-grid .day-cell:hover {
+            background: var(--bg-hover);
+        }
+
+        .date-calendar-grid .day-cell.other-month {
+            color: var(--text-muted);
+        }
+
+        .date-calendar-grid .day-cell.selected {
+            background: var(--accent);
+            color: white;
+            font-weight: 600;
+        }
+
+        .date-calendar-grid .day-cell.today {
+            border: 1px solid var(--accent);
+        }
+
+        .date-dropdown-clear {
+            display: block;
+            width: 100%;
+            margin-top: 0.5rem;
+            padding: 0.4rem;
+            background: none;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .date-dropdown-clear:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        select {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            padding: 0.5rem 0.625rem;
+            color: var(--text-primary);
+            font-size: 0.8rem;
+            width: 100%;
+            font-family: inherit;
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            padding-right: 2rem;
+            cursor: pointer;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: 0 -1.25rem;
+            padding: 0 1.25rem;
+        }
+
+        table {
+            width: 100%;
+            min-width: 600px;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            text-align: left;
+            padding: 0.625rem 0.75rem;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-light);
+            white-space: nowrap;
+            font-weight: 600;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background 0.15s;
+        }
+
+        tbody tr:hover {
+            background: var(--bg-hover);
+        }
+
+        tbody td {
+            padding: 0.75rem 0.75rem;
+            font-size: 0.8rem;
+            vertical-align: middle;
+            font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+            white-space: nowrap;
+        }
+
+        .clickable-row {
+            cursor: pointer;
+        }
+
+        .expand-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: default;
+            font-size: 0.65rem;
+            padding: 0.25rem;
+            transition: transform 0.2s;
+            pointer-events: none;
+        }
+
+        .expand-btn.rotated {
+            transform: rotate(90deg);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.15rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            white-space: nowrap;
+        }
+
+        .badge-network {
+            background: rgba(239, 68, 68, 0.12);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .badge-customer {
+            background: rgba(168, 85, 247, 0.12);
+            color: var(--purple);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+        }
+
+        .badge-both {
+            background: rgba(249, 115, 22, 0.12);
+            color: var(--accent);
+            border: 1px solid rgba(249, 115, 22, 0.2);
+        }
+
+        .badge-nodes {
+            background: rgba(59, 130, 246, 0.12);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .dropdown-row {
+            display: none;
+            background: var(--bg-primary);
+        }
+
+        .dropdown-row.active {
+            display: table-row;
+        }
+
+        .dropdown-content {
+            padding: 1.25rem 1.5rem;
+        }
+
+        .dropdown-content h4 {
+            margin-bottom: 0.75rem;
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .nodes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 0.5rem;
+        }
+
+        .node-tag {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            padding: 0.35rem 0.5rem;
+            font-size: 0.75rem;
+            font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .detail-label {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .detail-value {
+            font-size: 0.85rem;
+            font-weight: 600;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        /* Footer matching the screenshot */
+        .footer {
+            background: var(--bg-header);
+            border-top: 1px solid var(--border);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        .footer-left {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .footer-logo {
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+
+        .footer-sep {
+            color: var(--text-secondary);
+        }
+
+        .footer-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+        }
+
+        .footer-nav {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .footer-nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.75rem;
+            transition: color 0.2s;
+        }
+
+        .footer-nav a:hover {
+            color: var(--text-primary);
+        }
+
+        .mobile-nav-overlay {
+            display: none;
+            position: fixed;
+            top: 52px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 999;
+        }
+
+        .mobile-nav-overlay.active {
+            display: block;
+        }
+
+        .mobile-nav-menu {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem;
+        }
+
+        .mobile-nav-menu a {
+            display: block;
+            padding: 0.75rem 0;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .mobile-nav-menu a:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 768px) {
+            .main-content { padding: 0.75rem; }
+            .hero-banner { padding: 0.75rem 0; }
+            .hero-title { font-size: 1.3rem; }
+            .hero-right { display: none; }
+            .header-nav { display: none; }
+            .mobile-menu-btn { display: block; }
+            .header-subtitle { display: none; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+            .stat-card { padding: 1rem; }
+            .stat-value { font-size: 1.5rem; }
+            .charts-grid { grid-template-columns: 1fr; gap: 1rem; }
+            .chart-card { padding: 1rem; }
+            .table-section { padding: 1rem; border-radius: 6px; }
+            .table-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+            .filters { flex-direction: column; gap: 0.75rem; }
+            .filter-group { max-width: 100%; min-width: 100%; }
+            .filter-group label { font-size: 0.7rem; }
+            select, .date-dropdown-toggle { font-size: 16px; padding: 0.625rem 0.75rem; min-height: 40px; }
+            .date-dropdown-menu { min-width: 100%; left: 0; right: 0; }
+            .table-wrapper { margin: 0 -1rem; padding: 0 1rem; }
+            table { min-width: 100%; }
+            thead th { padding: 0.5rem 0.5rem; font-size: 0.6rem; }
+            tbody td { padding: 0.625rem 0.5rem; font-size: 0.75rem; }
+            .badge { font-size: 0.6rem; padding: 0.1rem 0.4rem; }
+            .dropdown-content { padding: 1rem; }
+            .detail-grid { grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+            .nodes-grid { grid-template-columns: repeat(3, 1fr); }
+            .node-tag { font-size: 0.7rem; padding: 0.3rem 0.4rem; }
+            .btn { width: 100%; justify-content: center; padding: 0.625rem; font-size: 0.8rem; }
+            .tabs { gap: 0; }
+            .tab-btn { padding: 0.625rem 1rem; font-size: 0.7rem; }
+            .footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+            .footer-nav { gap: 1rem; }
+        }
+
+        @media (max-width: 480px) {
+            .hero-title { font-size: 1.1rem; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .stat-value { font-size: 1.25rem; }
+            .detail-grid { grid-template-columns: 1fr; }
+            .nodes-grid { grid-template-columns: repeat(2, 1fr); }
+            tbody td { padding: 0.5rem 0.375rem; font-size: 0.7rem; }
+            thead th { padding: 0.5rem 0.375rem; font-size: 0.55rem; }
+        }
+
+        @media (min-width: 769px) {
+            .main-content { padding: 1.5rem; }
+            .stats-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+            .charts-grid { grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); }
+            .filters { flex-direction: row; }
+            .filter-group { min-width: 140px; max-width: 180px; }
+        }
+
+        @media (min-width: 1200px) {
+            .charts-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+<base target="_blank">
+</head>
+<body>
+    <header class="top-header">
+        <div class="header-left">
+            <div class="header-logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                </svg>
+                StormNet
+            </div>
+            <span class="header-subtitle">— Center za upravljanje izpadov</span>
+        </div>
+        <nav class="header-nav">
+            <a href="#">Karta vozlišč</a>
+            <a href="#">Poročila</a>
+        </nav>
+        <button class="mobile-menu-btn" onclick="toggleMobileNav()" aria-label="Menu">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+        </button>
+    </header>
+
+    <div class="mobile-nav-overlay" id="mobileNavOverlay" onclick="toggleMobileNav()">
+        <div class="mobile-nav-menu" onclick="event.stopPropagation()">
+            <a href="#">Karta vozlišč</a>
+            <a href="#">Poročila</a>
+        </div>
+    </div>
+
+    <main class="main-content">
+        <div class="hero-banner">
+            <div class="hero-top">
+                <div>
+                    <div class="hero-label">Optična infrastruktura</div>
+                    <h1 class="hero-title">Dnevnik <span>Incidentov</span></h1>
+                </div>
+                <div class="hero-right">
+                    Pregled izpadlih vozlišč<br>in prizadetih uporabnikov
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="incidents" onclick="switchTab('incidents')">Dnevnik incidentov</button>
+            <button class="tab-btn" data-tab="statistics" onclick="switchTab('statistics')">Statistika</button>
+        </div>
+
+        <div id="tab-incidents" class="tab-panel active">
+            <div class="table-section">
+                <div class="table-header">
+                    <h2>Dnevnik incidentov</h2>
+                    <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                        <span class="record-count" id="recordCount">0 zapisov</span>
+                        <button class="btn btn-success" onclick="exportToExcel()">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                            Izvozi CSV
+                        </button>
+                    </div>
+                </div>
+
+                <div class="filters">
+                    <div class="filter-group">
+                        <label>Datum od</label>
+                        <div class="date-dropdown" id="dateFromDropdown">
+                            <button class="date-dropdown-toggle" onclick="toggleDateDropdown('from')">
+                                <span id="dateFromLabel">Izberi datum</span>
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+                            </button>
+                            <div class="date-dropdown-menu" id="dateFromMenu">
+                                <div class="date-calendar-header">
+                                    <button onclick="changeMonth('from', -1)">‹</button>
+                                    <span id="dateFromMonthYear"></span>
+                                    <button onclick="changeMonth('from', 1)">›</button>
+                                </div>
+                                <div class="date-calendar-grid" id="dateFromGrid"></div>
+                                <button class="date-dropdown-clear" onclick="clearDate('from')">Počisti</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label>Datum do</label>
+                        <div class="date-dropdown" id="dateToDropdown">
+                            <button class="date-dropdown-toggle" onclick="toggleDateDropdown('to')">
+                                <span id="dateToLabel">Izberi datum</span>
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+                            </button>
+                            <div class="date-dropdown-menu" id="dateToMenu">
+                                <div class="date-calendar-header">
+                                    <button onclick="changeMonth('to', -1)">‹</button>
+                                    <span id="dateToMonthYear"></span>
+                                    <button onclick="changeMonth('to', 1)">›</button>
+                                </div>
+                                <div class="date-calendar-grid" id="dateToGrid"></div>
+                                <button class="date-dropdown-clear" onclick="clearDate('to')">Počisti</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label>Vrsta</label>
+                        <select id="filterType" onchange="applyFilters()">
+                            <option value="">Vse</option>
+                            <option value="network">Omrežje</option>
+                            <option value="customer">Stranka</option>
+                            <option value="both">Oboje</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Območje</label>
+                        <select id="filterArea" onchange="applyFilters()">
+                            <option value="">Vsa območja</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Vozlišča</label>
+                        <select id="filterNodes" onchange="applyFilters()">
+                            <option value="">Vse</option>
+                            <option value="yes">Z vozlišči</option>
+                            <option value="no">Brez vozlišč</option>
+                        </select>
+                    </div>
+                    <button class="btn" onclick="resetFilters()">Ponastavi</button>
+                </div>
+
+                <div class="table-wrapper">
+                    <table id="incidentTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 36px"></th>
+                                <th>Datum</th>
+                                <th>Izpada</th>
+                                <th>Uporabniki</th>
+                                <th>Območje</th>
+                                <th>Vrsta</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-statistics" class="tab-panel">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Skupaj incidentov</div>
+                    <div class="stat-value" id="totalIncidents">0</div>
+                    <div class="stat-trend" style="color: var(--text-secondary)">Ves čas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Samo omrežje</div>
+                    <div class="stat-value" id="networkOnly" style="color: var(--danger)">0</div>
+                    <div class="stat-trend" style="color: var(--danger)">Infrastruktura</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Samo stranka</div>
+                    <div class="stat-value" id="customerOnly" style="color: var(--purple)">0</div>
+                    <div class="stat-trend" style="color: var(--purple)">Končna oprema</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Oboje prizadeto</div>
+                    <div class="stat-value" id="bothAffected" style="color: var(--accent)">0</div>
+                    <div class="stat-trend" style="color: var(--accent)">Kombinirano</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Vozlišč izpadlih</div>
+                    <div class="stat-value" id="totalNodes" style="color: #60a5fa">0</div>
+                    <div class="stat-trend" style="color: #60a5fa">Skupaj offline</div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>Incidenti po vrsti</h3>
+                    <canvas id="typeChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Incidenti po območju</h3>
+                    <canvas id="areaChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Mesečni trend</h3>
+                    <canvas id="trendChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h3>Razporeditev izpadlih vozlišč</h3>
+                    <canvas id="nodesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-left">
+            <span class="footer-logo">StormNet</span>
+            <span class="footer-sep">—</span>
+            <span class="footer-subtitle">Center za upravljanje izpadov</span>
+        </div>
+        <nav class="footer-nav">
+            <a href="#">Karta vozlišč</a>
+            <a href="#">Poročila</a>
+            <a href="#">Obvestila</a>
+            <a href="#">Admin</a>
+        </nav>
+    </footer>
+
+    <script>
+        // ============================================
+        // INCIDENT DATA - EDIT THIS SECTION MANUALLY
+        // date: "YYYY-MM-DD" format
+        // type: "network", "customer", or "both"
+        // nodes: [] if none, or ["NODE-001", ...]
+        // offline: optional number of subscribers/customers offline (null if unknown)
+        // ============================================
+        const incidents = [
+            { date: "2025-03-14", area: "Downtown", type: "network", nodes: ["W4"], offline: 980, description: "Glavni fiber prerezan" },
+            { date: "2025-03-30", area: "East Side", type: "both", nodes: ["N2", "N3", "N5", "E1", "E2"], offline: 5120, description: "Huda neurja - backbone poškodovan + CPEji offline" },
+            { date: "2025-04-18", area: "North District", type: "network", nodes: ["S6", "S7", "S8"], offline: 2690, description: "Padlo drevo na fiber linije" },
+            { date: "2025-04-19", area: "South Park", type: "customer", nodes: ["W1"], offline: 450, description: "Napaka strankinega ONTja" },
+            { date: "2025-04-20", area: "West End", type: "both", nodes: ["E2", "E3"], offline: 1290, description: "Prometna nesreča poškodovala drog" },
+            { date: "2025-04-21", area: "Downtown", type: "network", nodes: ["N4", "N5", "N9", "N10"], offline: 4740, description: "Glavni backbone fiber prerezan" },
+            { date: "2025-04-22", area: "North District", type: "customer", nodes: [], offline: 22, description: "Napaka hladilnega sistema v strežniški sobi" },
+            { date: "2025-04-23", area: "East Side", type: "both", nodes: ["E4", "E5", "E6", "E7"], offline: 1560, description: "Vodna škoda na fiber spojni škatli + ONTji poplavljeni" },
+        ];
+        // ============================================
+        // END OF DATA SECTION
+        // ============================================
+
+        let filteredIncidents = [...incidents];
+        let expandedRows = new Set();
+        let chartsInitialized = false;
+
+        const datePickerState = {
+            from: { selected: null, currentMonth: new Date().getMonth(), currentYear: new Date().getFullYear() },
+            to: { selected: null, currentMonth: new Date().getMonth(), currentYear: new Date().getFullYear() }
+        };
+
+        const monthNames = ['Januar', 'Februar', 'Marec', 'April', 'Maj', 'Junij', 'Julij', 'Avgust', 'September', 'Oktober', 'November', 'December'];
+        const dayNames = ['P', 'T', 'S', 'Č', 'P', 'S', 'N'];
+
+        function formatNumberSI(num) {
+            if (num === null || num === undefined) return '';
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+
+        function formatDateDisplay(dateStr) {
+            const d = new Date(dateStr + 'T00:00:00');
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            return `${day}.${month}.${year}`;
+        }
+
+        function getTypeLabel(type) {
+            const labels = { network: 'Omrežje', customer: 'Stranka', both: 'Oboje' };
+            return labels[type] || type;
+        }
+
+        function getTypeBadgeClass(type) {
+            return 'badge-' + type;
+        }
+
+        function getTypeColor(type) {
+            const colors = { network: 'var(--danger)', customer: 'var(--purple)', both: 'var(--accent)' };
+            return colors[type] || 'var(--text-secondary)';
+        }
+
+        function formatOffline(offline) {
+            if (offline === null || offline === undefined) return '<span style="color: var(--text-muted)">—</span>';
+            return `<span style="color: var(--danger); font-weight: 600">${formatNumberSI(offline)}</span>`;
+        }
+
+        // ===== DATE PICKER =====
+        function toggleDateDropdown(which) {
+            const menu = document.getElementById(`date${which.charAt(0).toUpperCase() + which.slice(1)}Menu`);
+            const otherMenu = document.getElementById(which === 'from' ? 'dateToMenu' : 'dateFromMenu');
+            otherMenu.classList.remove('active');
+            menu.classList.toggle('active');
+            if (menu.classList.contains('active')) {
+                renderCalendar(which);
+            }
+        }
+
+        function renderCalendar(which) {
+            const state = datePickerState[which];
+            const grid = document.getElementById(`date${which.charAt(0).toUpperCase() + which.slice(1)}Grid`);
+            const header = document.getElementById(`date${which.charAt(0).toUpperCase() + which.slice(1)}MonthYear`);
+
+            header.textContent = `${monthNames[state.currentMonth]} ${state.currentYear}`;
+
+            let html = '';
+            dayNames.forEach(d => {
+                html += `<div class="day-label">${d}</div>`;
+            });
+
+            const firstDay = new Date(state.currentYear, state.currentMonth, 1).getDay();
+            const daysInMonth = new Date(state.currentYear, state.currentMonth + 1, 0).getDate();
+            const daysInPrevMonth = new Date(state.currentYear, state.currentMonth, 0).getDate();
+
+            for (let i = firstDay - 1; i >= 0; i--) {
+                html += `<div class="day-cell other-month">${daysInPrevMonth - i}</div>`;
+            }
+
+            const today = new Date();
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                let classes = 'day-cell';
+
+                if (state.selected === dateStr) classes += ' selected';
+                if (today.getFullYear() === state.currentYear && today.getMonth() === state.currentMonth && today.getDate() === day) {
+                    classes += ' today';
+                }
+
+                html += `<div class="${classes}" onclick="selectDate('${which}', '${dateStr}')">${day}</div>`;
+            }
+
+            const totalCells = firstDay + daysInMonth;
+            const remaining = 42 - totalCells;
+            for (let day = 1; day <= remaining; day++) {
+                html += `<div class="day-cell other-month">${day}</div>`;
+            }
+
+            grid.innerHTML = html;
+        }
+
+        function changeMonth(which, delta) {
+            const state = datePickerState[which];
+            state.currentMonth += delta;
+            if (state.currentMonth > 11) {
+                state.currentMonth = 0;
+                state.currentYear++;
+            } else if (state.currentMonth < 0) {
+                state.currentMonth = 11;
+                state.currentYear--;
+            }
+            renderCalendar(which);
+        }
+
+        function selectDate(which, dateStr) {
+            datePickerState[which].selected = dateStr;
+            document.getElementById(`date${which.charAt(0).toUpperCase() + which.slice(1)}Label`).textContent = formatDateDisplay(dateStr);
+            document.getElementById(`date${which.charAt(0).toUpperCase() + which.slice(1)}Menu`).classList.remove('active');
+            applyFilters();
+        }
+
+        function clearDate(which) {
+            datePickerState[which].selected = null;
+            document.getElementById(`date${which.charAt(0).toUpperCase() + which.slice(1)}Label`).textContent = 'Izberi datum';
+            document.getElementById(`date${which.charAt(0).toUpperCase() + which.slice(1)}Menu`).classList.remove('active');
+            applyFilters();
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.date-dropdown')) {
+                document.querySelectorAll('.date-dropdown-menu').forEach(m => m.classList.remove('active'));
+            }
+        });
+
+        function toggleMobileNav() {
+            document.getElementById('mobileNavOverlay').classList.toggle('active');
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+
+            if (tabName === 'statistics' && !chartsInitialized) {
+                initCharts();
+                chartsInitialized = true;
+            }
+        }
+
+        function initDashboard() {
+            updateStats();
+            populateAreaFilter();
+            renderTable();
+            updateRecordCount();
+        }
+
+        function updateStats() {
+            const total = incidents.length;
+            const network = incidents.filter(i => i.type === 'network').length;
+            const customer = incidents.filter(i => i.type === 'customer').length;
+            const both = incidents.filter(i => i.type === 'both').length;
+            const nodes = incidents.reduce((sum, i) => sum + i.nodes.length, 0);
+
+            document.getElementById('totalIncidents').textContent = total;
+            document.getElementById('networkOnly').textContent = network;
+            document.getElementById('customerOnly').textContent = customer;
+            document.getElementById('bothAffected').textContent = both;
+            document.getElementById('totalNodes').textContent = nodes;
+        }
+
+        function updateRecordCount() {
+            const count = filteredIncidents.length;
+            let suffix = 'ov';
+            if (count === 1) suffix = '';
+            else if (count === 2) suffix = 'a';
+            document.getElementById('recordCount').textContent = `${count} zapis${suffix}`;
+        }
+
+        function initCharts() {
+            Chart.defaults.color = '#6b7280';
+            Chart.defaults.borderColor = '#1f2937';
+
+            const ctx1 = document.getElementById('typeChart').getContext('2d');
+            const ctx2 = document.getElementById('areaChart').getContext('2d');
+            const ctx3 = document.getElementById('trendChart').getContext('2d');
+            const ctx4 = document.getElementById('nodesChart').getContext('2d');
+
+            const typeData = {
+                network: incidents.filter(i => i.type === 'network').length,
+                customer: incidents.filter(i => i.type === 'customer').length,
+                both: incidents.filter(i => i.type === 'both').length
+            };
+
+            new Chart(ctx1, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Omrežje', 'Stranka', 'Oboje'],
+                    datasets: [{
+                        data: [typeData.network, typeData.customer, typeData.both],
+                        backgroundColor: ['#ef4444', '#a855f7', '#f97316'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { padding: 15, font: { size: 11 }, boxWidth: 12 }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+
+            const areaCounts = {};
+            incidents.forEach(i => {
+                areaCounts[i.area] = (areaCounts[i.area] || 0) + 1;
+            });
+
+            new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(areaCounts),
+                    datasets: [{
+                        label: 'Incidenti',
+                        data: Object.values(areaCounts),
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 4,
+                        barThickness: 24
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { 
+                                stepSize: 1,
+                                callback: function(value) {
+                                    if (Number.isInteger(value)) return value;
+                                    return '';
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: { font: { size: 11 } },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+
+            const monthlyData = {};
+            incidents.forEach(i => {
+                const d = new Date(i.date + 'T00:00:00');
+                const key = `${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
+                monthlyData[key] = (monthlyData[key] || 0) + 1;
+            });
+            const sortedMonths = Object.keys(monthlyData).sort((a, b) => {
+                const [ma, ya] = a.split('.');
+                const [mb, yb] = b.split('.');
+                return new Date(ya, ma - 1) - new Date(yb, mb - 1);
+            });
+
+            new Chart(ctx3, {
+                type: 'line',
+                data: {
+                    labels: sortedMonths,
+                    datasets: [{
+                        label: 'Incidenti',
+                        data: sortedMonths.map(m => monthlyData[m]),
+                        borderColor: '#f97316',
+                        backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#f97316',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { 
+                                stepSize: 1,
+                                callback: function(value) {
+                                    if (Number.isInteger(value)) return value;
+                                    return '';
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: { font: { size: 11 } },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+
+            const nodesRanges = {
+                '0': incidents.filter(i => i.nodes.length === 0).length,
+                '1-2': incidents.filter(i => i.nodes.length >= 1 && i.nodes.length <= 2).length,
+                '3-5': incidents.filter(i => i.nodes.length >= 3 && i.nodes.length <= 5).length,
+                '6+': incidents.filter(i => i.nodes.length >= 6).length
+            };
+
+            new Chart(ctx4, {
+                type: 'bar',
+                data: {
+                    labels: ['0', '1-2', '3-5', '6+'],
+                    datasets: [{
+                        label: 'Incidenti',
+                        data: Object.values(nodesRanges),
+                        backgroundColor: ['#4b5563', '#3b82f6', '#8b5cf6', '#ef4444'],
+                        borderRadius: 4,
+                        barThickness: 32
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { 
+                                stepSize: 1,
+                                callback: function(value) {
+                                    if (Number.isInteger(value)) return value;
+                                    return '';
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: { font: { size: 11 } },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function populateAreaFilter() {
+            const areas = [...new Set(incidents.map(i => i.area))].sort();
+            const select = document.getElementById('filterArea');
+            areas.forEach(area => {
+                const opt = document.createElement('option');
+                opt.value = area;
+                opt.textContent = area;
+                select.appendChild(opt);
+            });
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            filteredIncidents.forEach((incident, index) => {
+                const row = document.createElement('tr');
+                const isExpanded = expandedRows.has(index);
+
+                // ALL rows are now clickable to show details, even if no nodes
+                row.className = 'clickable-row';
+                row.onclick = (e) => {
+                    if (e.target.closest('.expand-btn')) return;
+                    toggleRow(index);
+                };
+
+                const hasNodes = incident.nodes.length > 0;
+
+                row.innerHTML = `
+                    <td>
+                        <button class="expand-btn ${isExpanded ? 'rotated' : ''}">▶</button>
+                    </td>
+                    <td>${formatDateDisplay(incident.date)}</td>
+                    <td>${incident.nodes.length}</td>
+                    <td>${formatOffline(incident.offline)}</td>
+                    <td>${incident.area}</td>
+                    <td><span class="badge ${getTypeBadgeClass(incident.type)}">${getTypeLabel(incident.type)}</span></td>
+                `;
+                tbody.appendChild(row);
+
+                // Dropdown row for ALL incidents
+                const dropdown = document.createElement('tr');
+                dropdown.className = `dropdown-row ${isExpanded ? 'active' : ''}`;
+                dropdown.id = `dropdown-${index}`;
+                dropdown.innerHTML = `
+                    <td colspan="6">
+                        <div class="dropdown-content">
+                            <div class="detail-grid">
+                                <div class="detail-item">
+                                    <span class="detail-label">Datum</span>
+                                    <span class="detail-value">${formatDateDisplay(incident.date)}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Območje</span>
+                                    <span class="detail-value">${incident.area}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Vrsta</span>
+                                    <span class="detail-value" style="color: ${getTypeColor(incident.type)}">${getTypeLabel(incident.type)}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Izpada vozlišč</span>
+                                    <span class="detail-value" style="color: #60a5fa">${incident.nodes.length}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Prizadetih uporabnikov</span>
+                                    <span class="detail-value" style="color: var(--danger)">${incident.offline !== null && incident.offline !== undefined ? formatNumberSI(incident.offline) : '—'}</span>
+                                </div>
+                            </div>
+                            ${incident.description ? `
+                            <div style="margin-bottom: 1rem;">
+                                <span class="detail-label">Opis</span>
+                                <p style="margin-top: 0.25rem; color: var(--text-secondary); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 0.8rem;">${incident.description}</p>
+                            </div>
+                            ` : ''}
+                            ${hasNodes ? `
+                            <h4>Prizadeta vozlišča</h4>
+                            <div class="nodes-grid">
+                                ${incident.nodes.map(node => `<div class="node-tag">${node}</div>`).join('')}
+                            </div>
+                            ` : '<p style="color: var(--text-muted); font-style: italic; font-size: 0.8rem; margin-top: 0.5rem;">Brez prizadetih vozlišč</p>'}
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(dropdown);
+            });
+        }
+
+        function toggleRow(index) {
+            const dropdown = document.getElementById(`dropdown-${index}`);
+            const btn = document.querySelector(`tr:nth-child(${index * 2 + 1}) .expand-btn`);
+
+            if (expandedRows.has(index)) {
+                expandedRows.delete(index);
+                dropdown.classList.remove('active');
+                if (btn) btn.classList.remove('rotated');
+            } else {
+                expandedRows.add(index);
+                dropdown.classList.add('active');
+                if (btn) btn.classList.add('rotated');
+            }
+        }
+
+        function applyFilters() {
+            const dateFrom = datePickerState.from.selected;
+            const dateTo = datePickerState.to.selected;
+            const type = document.getElementById('filterType').value;
+            const area = document.getElementById('filterArea').value;
+            const nodes = document.getElementById('filterNodes').value;
+
+            filteredIncidents = incidents.filter(i => {
+                let match = true;
+                const itemDate = new Date(i.date + 'T00:00:00');
+
+                if (dateFrom) {
+                    const from = new Date(dateFrom + 'T00:00:00');
+                    if (itemDate < from) match = false;
+                }
+
+                if (dateTo) {
+                    const to = new Date(dateTo + 'T23:59:59');
+                    if (itemDate > to) match = false;
+                }
+
+                if (type && i.type !== type) match = false;
+                if (area && i.area !== area) match = false;
+                if (nodes === 'yes' && i.nodes.length === 0) match = false;
+                if (nodes === 'no' && i.nodes.length > 0) match = false;
+
+                return match;
+            });
+
+            expandedRows.clear();
+            renderTable();
+            updateRecordCount();
+        }
+
+        function resetFilters() {
+            clearDate('from');
+            clearDate('to');
+            document.getElementById('filterType').value = '';
+            document.getElementById('filterArea').value = '';
+            document.getElementById('filterNodes').value = '';
+            filteredIncidents = [...incidents];
+            expandedRows.clear();
+            renderTable();
+            updateRecordCount();
+        }
+
+        function exportToExcel() {
+            let csv = 'Datum,Območje,Vrsta,Izpada vozlišč,Prizadetih uporabnikov,Opis,Seznam vozlišč\n';
+
+            filteredIncidents.forEach(i => {
+                const nodesList = i.nodes.join('; ');
+                const offlineVal = i.offline !== null && i.offline !== undefined ? formatNumberSI(i.offline) : '';
+                csv += `"${formatDateDisplay(i.date)}","${i.area}","${getTypeLabel(i.type)}","${i.nodes.length}","${offlineVal}","${i.description || ''}","${nodesList}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `incidenti_export_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        document.addEventListener('DOMContentLoaded', initDashboard);
+    </script>
+</body>
+</html>
