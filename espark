@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Električar Tool | SaaS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --bg-card: #1a1f2e;
+            --bg-card-hover: #222838;
+            --bg-input: #0f141f;
+            --border: #2a3142;
+            --border-focus: #3b82f6;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --accent-glow: rgba(59, 130, 246, 0.15);
+            --success: #10b981;
+            --success-bg: rgba(16, 185, 129, 0.1);
+            --warning: #f59e0b;
+            --warning-bg: rgba(245, 158, 11, 0.1);
+            --danger: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.1);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Animated background gradient */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.03) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.02) 0%, transparent 40%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .app-container {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        /* Header */
+        .header {
+            padding: 20px 0 16px;
+            text-align: center;
+        }
+
+        .header-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent), #6366f1);
+            border-radius: var(--radius);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .header-icon svg {
+            width: 24px;
+            height: 24px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-top: 4px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            background: var(--bg-secondary);
+            padding: 6px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 600;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tab-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--accent);
+            opacity: 0;
+            transition: opacity 0.3s;
+            border-radius: var(--radius-sm);
+        }
+
+        .tab-btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .tab-btn.active {
+            color: white;
+            box-shadow: var(--shadow);
+        }
+
+        .tab-btn.active::before {
+            opacity: 1;
+        }
+
+        .tab-btn:not(.active):hover {
+            color: var(--text-primary);
+            background: var(--bg-card-hover);
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title svg {
+            width: 20px;
+            height: 20px;
+            color: var(--accent);
+        }
+
+        /* Input Groups */
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper input, .input-wrapper select {
+            width: 100%;
+            padding: 12px 16px;
+            padding-right: 50px;
+            background: var(--bg-input);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.2s;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .input-wrapper input:focus, .input-wrapper select:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .input-unit {
+            position: absolute;
+            right: 16px;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            font-weight: 500;
+            pointer-events: none;
+        }
+
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--accent), #4f46e5);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn:hover {
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            border: 1.5px solid var(--border);
+            color: var(--text-primary);
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-focus);
+        }
+
+        .btn-danger {
+            background: var(--danger-bg);
+            color: var(--danger);
+            border: 1.5px solid rgba(239, 68, 68, 0.3);
+            box-shadow: none;
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-sm {
+            padding: 8px 12px;
+            font-size: 0.8125rem;
+            width: auto;
+        }
+
+        /* Results */
+        .result-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .result-value {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9375rem;
+        }
+
+        .result-value.highlight {
+            color: var(--accent);
+            font-size: 1.125rem;
+        }
+
+        .result-value.success {
+            color: var(--success);
+        }
+
+        .result-value.warning {
+            color: var(--warning);
+        }
+
+        /* Suggestion Badge */
+        .suggestion {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .suggestion.fuse {
+            background: var(--warning-bg);
+            color: var(--warning);
+        }
+
+        .suggestion.cable {
+            background: var(--success-bg);
+            color: var(--success);
+        }
+
+        /* Invoice Items */
+        .invoice-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            margin-bottom: 10px;
+            transition: all 0.2s;
+        }
+
+        .invoice-item:hover {
+            border-color: var(--border-focus);
+            background: var(--bg-card-hover);
+        }
+
+        .invoice-item-info {
+            flex: 1;
+        }
+
+        .invoice-item-name {
+            font-weight: 600;
+            font-size: 0.9375rem;
+            margin-bottom: 2px;
+        }
+
+        .invoice-item-price {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+        }
+
+        .invoice-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .qty-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-input);
+            border-radius: var(--radius-sm);
+            padding: 4px;
+            border: 1px solid var(--border);
+        }
+
+        .qty-btn {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.125rem;
+            font-weight: 600;
+            transition: all 0.15s;
+        }
+
+        .qty-btn:active {
+            background: var(--accent);
+            color: white;
+            transform: scale(0.95);
+        }
+
+        .qty-value {
+            min-width: 28px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.9375rem;
+        }
+
+        .invoice-item-total {
+            min-width: 70px;
+            text-align: right;
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--accent);
+        }
+
+        /* Total Section */
+        .total-section {
+            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-card));
+            border: 1.5px solid var(--accent);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 0.9375rem;
+        }
+
+        .total-row.grand {
+            border-top: 2px solid var(--accent);
+            margin-top: 8px;
+            padding-top: 12px;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .total-row.grand .total-value {
+            color: var(--accent);
+        }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 20px 0;
+        }
+
+        /* Info text */
+        .info-text {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .card {
+                padding: 16px;
+            }
+            
+            .header h1 {
+                font-size: 1.25rem;
+            }
+            
+            .tab-btn {
+                padding: 10px 12px;
+                font-size: 0.8125rem;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* Print styles for invoice */
+        @media print {
+            body { background: white; color: black; }
+            .tabs, .btn, .qty-btn { display: none !important; }
+            .card { border: 1px solid #ddd; box-shadow: none; }
+            .total-section { border: 2px solid #333; box-shadow: none; }
+        }
+
+        /* Section label */
+        .section-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+            </div>
+            <h1>Električar Tool</h1>
+            <p>Izračuni & Ponudbe za električarje</p>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('calc')">
+                <span>🔧 Izračuni</span>
+            </button>
+            <button class="tab-btn" onclick="switchTab('invoice')">
+                <span>📋 Ponudba</span>
+            </button>
+        </div>
+
+        <!-- TAB 1: CALCULATIONS -->
+        <div id="tab-calc" class="tab-content active">
+            <!-- Power Calculator -->
+            <div class="card">
+                <div class="card-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    Moč (P) iz toka (I)
+                </div>
+                <div class="input-group">
+                    <label>Napetost (privzeto)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="voltage-p" value="240" readonly style="opacity: 0.7;">
+                        <span class="input-unit">V</span>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Tok (I)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="current-p" placeholder="Vnesite tok..." step="0.1" min="0">
+                        <span class="input-unit">A</span>
+                    </div>
+                </div>
+                <button class="btn" onclick="calculatePower()">Izračunaj moč</button>
+                
+                <div id="result-power" class="result-box" style="display: none;">
+                    <div class="result-row">
+                        <span class="result-label">Moč (P):</span>
+                        <span class="result-value highlight" id="res-power-val">0 W</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Priporočena varovalka:</span>
+                        <span class="result-value" id="res-fuse-p">-</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Priporočen presek kabla:</span>
+                        <span class="result-value" id="res-cable-p">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Calculator -->
+            <div class="card">
+                <div class="card-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Tok (I) iz moči (P)
+                </div>
+                <div class="input-group">
+                    <label>Napetost (privzeto)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="voltage-i" value="240" readonly style="opacity: 0.7;">
+                        <span class="input-unit">V</span>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Moč (P)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="power-i" placeholder="Vnesite moč..." step="10" min="0">
+                        <span class="input-unit">W</span>
+                    </div>
+                </div>
+                <button class="btn" onclick="calculateCurrent()">Izračunaj tok</button>
+                
+                <div id="result-current" class="result-box" style="display: none;">
+                    <div class="result-row">
+                        <span class="result-label">Tok (I):</span>
+                        <span class="result-value highlight" id="res-current-val">0 A</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Priporočena varovalka:</span>
+                        <span class="result-value" id="res-fuse-i">-</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Priporočen presek kabla:</span>
+                        <span class="result-value" id="res-cable-i">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Energy Cost Calculator -->
+            <div class="card">
+                <div class="card-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Izračun stroškov električne energije
+                </div>
+                <div class="input-group">
+                    <label>Napetost</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="voltage-cost" value="240" readonly style="opacity: 0.7;">
+                        <span class="input-unit">V</span>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Moč aparata (P)</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="power-cost" placeholder="Vnesite moč..." step="10" min="0">
+                        <span class="input-unit">W</span>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Čas delovanja na dan</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="hours-cost" placeholder="Ur na dan..." step="0.5" min="0" max="24">
+                        <span class="input-unit">h</span>
+                    </div>
+                </div>
+                <button class="btn" onclick="calculateEnergyCost()">Izračunaj stroške</button>
+                
+                <div id="result-cost" class="result-box" style="display: none;">
+                    <div class="result-row">
+                        <span class="result-label">Poraba na dan:</span>
+                        <span class="result-value" id="res-kwh-day">0 kWh</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Poraba na mesec (30 dni):</span>
+                        <span class="result-value" id="res-kwh-month">0 kWh</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Strošek na dan:</span>
+                        <span class="result-value success" id="res-cost-day">0 €</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="result-label">Strošek na mesec:</span>
+                        <span class="result-value highlight success" id="res-cost-month">0 €</span>
+                    </div>
+                </div>
+                <p class="info-text">Cena elektrike: ~0.21 €/kWh (gospodinjstvo, Slovenija 2026)citeweb_search:1#2web_search:1#4</p>
+            </div>
+        </div>
+
+        <!-- TAB 2: INVOICING -->
+        <div id="tab-invoice" class="tab-content">
+            <div class="card">
+                <div class="card-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    Postavke ponudbe
+                </div>
+                
+                <div class="section-label">🔌 Material</div>
+                <div id="invoice-items-material"></div>
+                
+                <div class="section-label">🔨 Delo</div>
+                <div id="invoice-items-work"></div>
+                
+                <div class="section-label">🏠 Elementi</div>
+                <div id="invoice-items-elements"></div>
+
+                <div class="divider"></div>
+
+                <div class="total-section">
+                    <div class="total-row">
+                        <span>Skupaj material:</span>
+                        <span class="total-value" id="total-material">0.00 €</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Skupaj delo:</span>
+                        <span class="total-value" id="total-work">0.00 €</span>
+                    </div>
+                    <div class="total-row">
+                        <span>Skupaj elementi:</span>
+                        <span class="total-value" id="total-elements">0.00 €</span>
+                    </div>
+                    <div class="total-row grand">
+                        <span>SKUPAJ ZA PLAČILO:</span>
+                        <span class="total-value" id="total-grand">0.00 €</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 16px; display: flex; gap: 8px;">
+                    <button class="btn btn-secondary btn-sm" onclick="resetInvoice()" style="flex: 1;">Ponastavi</button>
+                    <button class="btn btn-sm" onclick="window.print()" style="flex: 1;">🖨️ Natisni</button>
+                </div>
+            </div>
+
+            <p class="info-text">
+                Cene so nastavljive v kodi (PRICES objekt).<<br>
+                DDV ni vključen.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURATION - Easy to modify prices here
+        // ============================================
+        const PRICES = {
+            // Material
+            fuse: { name: 'Varovalka', price: 6.00, unit: 'kos', category: 'material', icon: '⚡' },
+            cable_1_5: { name: 'Kabel 1.5 mm²', price: 5.00, unit: 'm', category: 'material', icon: '🔌' },
+            cable_2_5: { name: 'Kabel 2.5 mm²', price: 5.50, unit: 'm', category: 'material', icon: '🔌' },
+            cable_4: { name: 'Kabel 4 mm²', price: 6.50, unit: 'm', category: 'material', icon: '🔌' },
+            cable_6: { name: 'Kabel 6 mm²', price: 8.00, unit: 'm', category: 'material', icon: '🔌' },
+            cable_10: { name: 'Kabel 10 mm²', price: 12.00, unit: 'm', category: 'material', icon: '🔌' },
+            
+            // Work
+            work_hour: { name: 'Delo', price: 50.00, unit: 'h', category: 'work', icon: '🔧' },
+            
+            // Elements
+            socket: { name: 'Vtičnica', price: 5.00, unit: 'kos', category: 'elements', icon: '🔌' },
+            switch: { name: 'Stikalo', price: 5.00, unit: 'kos', category: 'elements', icon: '🔘' },
+            light: { name: 'Svetilka', price: 15.00, unit: 'kos', category: 'elements', icon: '💡' },
+            junction: { name: 'Razdelilec', price: 8.00, unit: 'kos', category: 'elements', icon: '🔀' },
+        };
+
+        // Electricity price per kWh (Slovenia ~2026)
+        const ELECTRICITY_PRICE_KWH = 0.21; // €/kWh
+
+        // Slovenian cable/fuse sizing table (simplified for single-phase 240V)
+        // Based on standard IEC/HD 60364-5-52 and Slovenian practice
+        const CABLE_SIZING = [
+            { maxCurrent: 16, fuse: '16A B', cable: '1.5 mm²', note: 'Osvetlitev, majhni aparati' },
+            { maxCurrent: 20, fuse: '20A B', cable: '2.5 mm²', note: 'Standardne vtičnice' },
+            { maxCurrent: 25, fuse: '25A B', cable: '4 mm²', note: 'Močnejši aparati' },
+            { maxCurrent: 32, fuse: '32A B', cable: '6 mm²', note: 'Kuhinje, pečice' },
+            { maxCurrent: 40, fuse: '40A B', cable: '10 mm²', note: 'Stroji, toplotne črpalke' },
+            { maxCurrent: 63, fuse: '63A B', cable: '16 mm²', note: 'Glavni dovod' },
+            { maxCurrent: Infinity, fuse: 'Nad 63A', cable: '25 mm²+', note: 'Posebni dovodi' },
+        ];
+
+        // ============================================
+        // TAB SWITCHING
+        // ============================================
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById('tab-' + tab).classList.add('active');
+            event.target.closest('.tab-btn').classList.add('active');
+        }
+
+        // ============================================
+        // CABLE/FUSE SUGGESTION LOGIC
+        // ============================================
+        function getSuggestion(current) {
+            for (let row of CABLE_SIZING) {
+                if (current <= row.maxCurrent) {
+                    return row;
+                }
+            }
+            return CABLE_SIZING[CABLE_SIZING.length - 1];
+        }
+
+        function formatSuggestion(suggestion) {
+            return `<span class="suggestion fuse">⚡ ${suggestion.fuse}</span> <span class="suggestion cable">🔌 ${suggestion.cable}</span><br><small style="color: var(--text-muted); font-size: 0.75rem;">${suggestion.note}</small>`;
+        }
+
+        // ============================================
+        // CALCULATION FUNCTIONS
+        // ============================================
+        function calculatePower() {
+            const voltage = 240;
+            const current = parseFloat(document.getElementById('current-p').value);
+            
+            if (!current || current <= 0) {
+                alert('Vnesite veljaven tok (I)!');
+                return;
+            }
+            
+            const power = voltage * current;
+            const suggestion = getSuggestion(current);
+            
+            document.getElementById('res-power-val').textContent = power.toLocaleString('sl-SI') + ' W (' + (power/1000).toFixed(2) + ' kW)';
+            document.getElementById('res-fuse-p').innerHTML = formatSuggestion(suggestion);
+            
+            const resultBox = document.getElementById('result-power');
+            resultBox.style.display = 'block';
+            resultBox.style.animation = 'none';
+            resultBox.offsetHeight; // trigger reflow
+            resultBox.style.animation = 'fadeIn 0.3s ease';
+        }
+
+        function calculateCurrent() {
+            const voltage = 240;
+            const power = parseFloat(document.getElementById('power-i').value);
+            
+            if (!power || power <= 0) {
+                alert('Vnesite veljavno moč (P)!');
+                return;
+            }
+            
+            const current = power / voltage;
+            const suggestion = getSuggestion(current);
+            
+            document.getElementById('res-current-val').textContent = current.toFixed(2) + ' A';
+            document.getElementById('res-fuse-i').innerHTML = formatSuggestion(suggestion);
+            
+            const resultBox = document.getElementById('result-current');
+            resultBox.style.display = 'block';
+            resultBox.style.animation = 'none';
+            resultBox.offsetHeight;
+            resultBox.style.animation = 'fadeIn 0.3s ease';
+        }
+
+        function calculateEnergyCost() {
+            const voltage = 240;
+            const power = parseFloat(document.getElementById('power-cost').value);
+            const hoursPerDay = parseFloat(document.getElementById('hours-cost').value);
+            
+            if (!power || power <= 0) {
+                alert('Vnesite moč aparata (P)!');
+                return;
+            }
+            if (!hoursPerDay || hoursPerDay <= 0) {
+                alert('Vnesite čas delovanja na dan!');
+                return;
+            }
+            
+            const powerKW = power / 1000;
+            const kwhPerDay = powerKW * hoursPerDay;
+            const kwhPerMonth = kwhPerDay * 30;
+            const costPerDay = kwhPerDay * ELECTRICITY_PRICE_KWH;
+            const costPerMonth = kwhPerMonth * ELECTRICITY_PRICE_KWH;
+            
+            document.getElementById('res-kwh-day').textContent = kwhPerDay.toFixed(3) + ' kWh';
+            document.getElementById('res-kwh-month').textContent = kwhPerMonth.toFixed(2) + ' kWh';
+            document.getElementById('res-cost-day').textContent = costPerDay.toFixed(2) + ' €';
+            document.getElementById('res-cost-month').textContent = costPerMonth.toFixed(2) + ' €';
+            
+            const resultBox = document.getElementById('result-cost');
+            resultBox.style.display = 'block';
+            resultBox.style.animation = 'none';
+            resultBox.offsetHeight;
+            resultBox.style.animation = 'fadeIn 0.3s ease';
+        }
+
+        // ============================================
+        // INVOICING SYSTEM
+        // ============================================
+        let invoiceState = {};
+
+        function initInvoice() {
+            // Initialize quantities to 0
+            Object.keys(PRICES).forEach(key => {
+                invoiceState[key] = 0;
+            });
+            renderInvoiceItems();
+        }
+
+        function renderInvoiceItems() {
+            const categories = {
+                material: document.getElementById('invoice-items-material'),
+                work: document.getElementById('invoice-items-work'),
+                elements: document.getElementById('invoice-items-elements')
+            };
+
+            // Clear all
+            Object.values(categories).forEach(el => el.innerHTML = '');
+
+            Object.entries(PRICES).forEach(([key, item]) => {
+                const qty = invoiceState[key];
+                const total = qty * item.price;
+                
+                const div = document.createElement('div');
+                div.className = 'invoice-item';
+                div.innerHTML = `
+                    <div class="invoice-item-info">
+                        <div class="invoice-item-name">${item.icon} ${item.name}</div>
+                        <div class="invoice-item-price">${item.price.toFixed(2)} € / ${item.unit}</div>
+                    </div>
+                    <div class="invoice-item-controls">
+                        <div class="qty-control">
+                            <button class="qty-btn" onclick="changeQty('${key}', -1)">−</button>
+                            <span class="qty-value">${qty}</span>
+                            <button class="qty-btn" onclick="changeQty('${key}', 1)">+</button>
+                        </div>
+                        <div class="invoice-item-total">${total.toFixed(2)} €</div>
+                    </div>
+                `;
+                
+                categories[item.category].appendChild(div);
+            });
+
+            updateTotals();
+        }
+
+        function changeQty(key, delta) {
+            const newQty = invoiceState[key] + delta;
+            if (newQty >= 0) {
+                invoiceState[key] = newQty;
+                renderInvoiceItems();
+            }
+        }
+
+        function updateTotals() {
+            let totalMaterial = 0, totalWork = 0, totalElements = 0;
+
+            Object.entries(PRICES).forEach(([key, item]) => {
+                const qty = invoiceState[key];
+                const total = qty * item.price;
+                
+                if (item.category === 'material') totalMaterial += total;
+                else if (item.category === 'work') totalWork += total;
+                else if (item.category === 'elements') totalElements += total;
+            });
+
+            const grandTotal = totalMaterial + totalWork + totalElements;
+
+            document.getElementById('total-material').textContent = totalMaterial.toFixed(2) + ' €';
+            document.getElementById('total-work').textContent = totalWork.toFixed(2) + ' €';
+            document.getElementById('total-elements').textContent = totalElements.toFixed(2) + ' €';
+            document.getElementById('total-grand').textContent = grandTotal.toFixed(2) + ' €';
+        }
+
+        function resetInvoice() {
+            if (confirm('Ali res želite ponastaviti vse postavke?')) {
+                Object.keys(invoiceState).forEach(key => {
+                    invoiceState[key] = 0;
+                });
+                renderInvoiceItems();
+            }
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            initInvoice();
+        });
+
+        // Allow Enter key to trigger calculation
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const activeTab = document.querySelector('.tab-content.active').id;
+                if (activeTab === 'tab-calc') {
+                    if (document.activeElement.id === 'current-p') calculatePower();
+                    else if (document.activeElement.id === 'power-i') calculateCurrent();
+                    else if (document.activeElement.id === 'hours-cost') calculateEnergyCost();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
