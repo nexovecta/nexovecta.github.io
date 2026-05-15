@@ -1,5 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Portal</title>
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #111118;
+            --bg-card: #16161f;
+            --bg-card-hover: #1c1c28;
+            --border: #252532;
+            --border-hover: #353545;
+            --text-primary: #e8e8f0;
+            --text-secondary: #8a8a9e;
+            --accent: #6366f1;
+            --accent-hover: #818cf8;
+            --accent-glow: rgba(99, 102, 241, 0.15);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+
+        /* Subtle background effect */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-glow {
+            position: fixed;
+            top: -50%;
+            left: -20%;
+            width: 140%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 900px;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        /* Header */
+        .header {
+            margin-bottom: 60px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .logo {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.3);
+        }
+
+        .logo svg {
+            width: 24px;
+            height: 24px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent-hover));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            max-width: 500px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Apps Grid */
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            margin-top: 40px;
+        }
+
+        .app-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px 32px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            animation: fadeInUp 0.8s ease-out backwards;
+        }
+
+        .app-card:nth-child(1) { animation-delay: 0.1s; }
+        .app-card:nth-child(2) { animation-delay: 0.2s; }
+
+        .app-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .app-card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-hover);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--accent-glow);
+        }
+
+        .app-card:hover::before {
+            opacity: 1;
+        }
+
+        .app-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            font-size: 28px;
+            transition: transform 0.3s ease;
+        }
+
+        .app-card:hover .app-icon {
+            transform: scale(1.1);
+        }
+
+        .app-icon.game {
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            box-shadow: 0 8px 24px rgba(245, 158, 11, 0.25);
+        }
+
+        .app-icon.espark {
+            background: linear-gradient(135deg, #06b6d4, #3b82f6);
+            box-shadow: 0 8px 24px rgba(6, 182, 212, 0.25);
+        }
+
+        .app-card h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .app-card .description {
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        .app-card .action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent);
+            font-weight: 500;
+            font-size: 0.875rem;
+            transition: gap 0.3s ease;
+        }
+
+        .app-card:hover .action {
+            gap: 12px;
+            color: var(--accent-hover);
+        }
+
+        .app-card .action svg {
+            width: 16px;
+            height: 16px;
+            transition: transform 0.3s ease;
+        }
+
+        .app-card:hover .action svg {
+            transform: translateX(4px);
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 80px;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            opacity: 0.6;
+            animation: fadeIn 1s ease-out 0.5s backwards;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 0.6; }
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .header h1 {
+                font-size: 1.875rem;
+            }
+            
+            .apps-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .app-card {
+                padding: 32px 24px;
+            }
+        }
+    </style>
+<base target="_blank">
 </head>
-<a href="https://nexovecta.github.io/game.html">GAME</a>
-<a href="https://nexovecta.github.io/server_status_dashboard.html">DASHBOARD</a>
+<body>
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                </svg>
+            </div>
+            <h1>Application Portal</h1>
+            <p>Access your tools and applications from a single, unified dashboard.</p>
+        </div>
+
+        <div class="apps-grid">
+            <a href="https://nexovecta.github.io/game.html" class="app-card">
+                <div class="app-icon game">🎮</div>
+                <h2>GAME</h2>
+                <p class="description">Interactive gaming experience with modern mechanics and engaging gameplay.</p>
+                <span class="action">
+                    Open Application
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </span>
+            </a>
+
+            <a href="https://nexovecta.github.io/espark.html" class="app-card">
+                <div class="app-icon espark">⚡</div>
+                <h2>ESPARK</h2>
+                <p class="description">Energy and spark management tool for tracking and optimizing your systems.</p>
+                <span class="action">
+                    Open Application
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </span>
+            </a>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 App Portal. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
