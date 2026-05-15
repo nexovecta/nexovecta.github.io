@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receptko — Ideje za vsak dan</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #F8F6F3;
+            --card: #FFFFFF;
+            --text: #1A1A1A;
+            --text-light: #6B7280;
+            --accent: #FF6B35;
+            --accent-soft: #FFF0EB;
+            --accent-hover: #E55A2B;
+            --green: #10B981;
+            --green-soft: #ECFDF5;
+            --purple: #8B5CF6;
+            --purple-soft: #F3E8FF;
+            --yellow: #F59E0B;
+            --yellow-soft: #FFFBEB;
+            --radius: 20px;
+            --radius-sm: 12px;
+            --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 20px rgba(0,0,0,0.06);
+            --shadow-hover: 0 1px 3px rgba(0,0,0,0.04), 0 12px 40px rgba(0,0,0,0.12);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1A1A2E 0%, #16213E 50%, #0F3460 100%);
+            color: white;
+            padding: 3rem 1.5rem 4rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 30% 50%, rgba(255,107,53,0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(139,92,246,0.1) 0%, transparent 50%);
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -1px;
+        }
+
+        .logo span { color: var(--accent); }
+
+        .tagline {
+            font-size: 1.1rem;
+            opacity: 0.7;
+            font-weight: 300;
+            margin-bottom: 2rem;
+        }
+
+        .random-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            box-shadow: 0 4px 20px rgba(255,107,53,0.4);
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .random-btn:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 30px rgba(255,107,53,0.5);
+        }
+
+        .random-btn:active { transform: scale(0.98); }
+
+        .container {
+            max-width: 1200px;
+            margin: -2rem auto 0;
+            padding: 0 1.5rem 3rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .input-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+
+        .section-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text);
+        }
+
+        .input-wrap {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+
+        .ingredient-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid #E5E7EB;
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s;
+            background: #FAFAFA;
+        }
+
+        .ingredient-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: white;
+            box-shadow: 0 0 0 4px var(--accent-soft);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+            font-size: 1.3rem;
+        }
+
+        .tags-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            min-height: 36px;
+        }
+
+        .tag {
+            background: var(--accent-soft);
+            color: var(--accent-hover);
+            padding: 0.35rem 0.9rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            animation: popIn 0.25s ease;
+            cursor: default;
+        }
+
+        .tag .remove {
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+            font-size: 1rem;
+        }
+
+        .tag .remove:hover { opacity: 1; }
+
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .quick-add { margin-bottom: 1.5rem; }
+
+        .quick-label {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.6rem;
+            font-weight: 600;
+        }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .chip {
+            background: white;
+            border: 1.5px solid #E5E7EB;
+            padding: 0.4rem 0.9rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        .chip:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-soft);
+            transform: translateY(-1px);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.8rem 1.6rem;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-primary {
+            background: var(--text);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #333;
+            transform: translateY(-1px);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-light);
+            border: 1.5px solid #E5E7EB;
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--text-light);
+            color: var(--text);
+        }
+
+        .random-result {
+            background: linear-gradient(135deg, var(--accent-soft), #FFF8F5);
+            border: 2px solid var(--accent);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: none;
+            animation: slideDown 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .random-result::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,107,53,0.1), transparent 70%);
+            pointer-events: none;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .random-result.show { display: block; }
+
+        .random-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: var(--accent);
+            color: white;
+            padding: 0.3rem 0.9rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .random-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .random-meta {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .random-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .random-desc {
+            color: var(--text-light);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            max-width: 600px;
+        }
+
+        .random-ingredients {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .random-ing {
+            background: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            border: 1px solid #E5E7EB;
+        }
+
+        .random-actions {
+            display: flex;
+            gap: 0.8rem;
+        }
+
+        .btn-accent {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-accent:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            border: none;
+            background: white;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-family: 'Inter', sans-serif;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        }
+
+        .tab:hover { color: var(--text); transform: translateY(-1px); }
+
+        .tab.active {
+            background: var(--text);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border-radius: var(--radius-sm);
+            padding: 1.2rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+
+        .stat-num {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            margin-top: 0.2rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .recipe-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(0,0,0,0.04);
+        }
+
+        .recipe-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .recipe-card.hidden { display: none; }
+
+        .recipe-top {
+            padding: 1.5rem;
+            color: white;
+            position: relative;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .recipe-top.soup { background: linear-gradient(135deg, #F59E0B, #D97706); }
+        .recipe-top.main { background: linear-gradient(135deg, #10B981, #059669); }
+        .recipe-top.dessert { background: linear-gradient(135deg, #8B5CF6, #7C3AED); }
+
+        .recipe-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(8px);
+            padding: 0.25rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .recipe-top h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+
+        .recipe-sub {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .recipe-body {
+            padding: 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .recipe-desc {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 1rem;
+        }
+
+        .ingredients-box { margin-bottom: 1rem; }
+
+        .ing-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .ing-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+        }
+
+        .ing-tag {
+            font-size: 0.8rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .ing-tag.have {
+            background: var(--green-soft);
+            color: #047857;
+        }
+
+        .ing-tag.missing {
+            background: #F3F4F6;
+            color: var(--text-light);
+        }
+
+        .match-bar {
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px solid #F3F4F6;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .bar-track {
+            flex: 1;
+            height: 6px;
+            background: #F3F4F6;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .bar-fill.high { background: linear-gradient(90deg, var(--green), #34D399); }
+        .bar-fill.mid { background: linear-gradient(90deg, var(--yellow), #FBBF24); }
+        .bar-fill.low { background: linear-gradient(90deg, #EF4444, #F87171); }
+
+        .match-text {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-light);
+            white-space: nowrap;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-light);
+        }
+
+        .empty .material-icons-round {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: #D1D5DB;
+        }
+
+        .empty h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+        }
+
+        .footer {
+            background: linear-gradient(135deg, #1A1A2E 0%, #16213E 50%, #0F3460 100%);
+            color: rgba(255,255,255,0.6);
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+            font-size: 0.9rem;
+            position: relative;
+            overflow: hidden;
+            margin-top: 3rem;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 70% 50%, rgba(255,107,53,0.1) 0%, transparent 50%);
+        }
+
+        .footer-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-brand {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-brand span { color: var(--accent); }
+
+        .footer-copy {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-top: 0.5rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: rgba(255,255,255,0.5);
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover { color: var(--accent); }
+
+        @media (max-width: 640px) {
+            .logo { font-size: 2rem; }
+            .header { padding: 2rem 1rem 3rem; }
+            .grid { grid-template-columns: 1fr; }
+            .random-title { font-size: 1.4rem; }
+            .footer-brand { font-size: 1.2rem; }
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
+    </style>
+<base target="_blank">
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">Recept<span>ko</span></div>
+            <p class="tagline">Vnesi sestavine, ki jih imaš, in poišči nekaj okusnega.</p>
+            <button class="random-btn" onclick="suggestRandomLunch()">
+                <span class="material-icons-round">shuffle</span>
+                Naključni predlog za kosilo
+            </button>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Random Result -->
+        <div class="random-result" id="randomResult">
+            <div class="random-badge">
+                <span class="material-icons-round" style="font-size:1rem;">restaurant</span>
+                Predlog za kosilo
+            </div>
+            <div class="random-title" id="randomTitle"></div>
+            <div class="random-meta" id="randomMeta"></div>
+            <div class="random-desc" id="randomDesc"></div>
+            <div class="random-ingredients" id="randomIngredients"></div>
+            <div class="random-actions">
+                <button class="btn btn-accent" onclick="suggestRandomLunch()">
+                    <span class="material-icons-round">shuffle</span>
+                    Še en predlog
+                </button>
+                <button class="btn btn-ghost" onclick="closeRandom()">
+                    Zapri
+                </button>
+            </div>
+        </div>
+
+        <!-- Input -->
+        <div class="input-card">
+            <h2 class="section-title">
+                <span class="material-icons-round" style="color:var(--accent);">kitchen</span>
+                Kaj imate v kuhinji?
+            </h2>
+            
+            <div class="input-wrap">
+                <span class="material-icons-round input-icon">search</span>
+                <input type="text" class="ingredient-input" id="ingredientInput" 
+                       placeholder="Vpiši sestavino in pritisni Enter (npr. piščanec, krompir, jajca...)"
+                       autocomplete="off">
+            </div>
+
+            <div class="tags-area" id="tagsArea"></div>
+
+            <div class="quick-add">
+                <div class="quick-label">Hitro dodaj priljubljene:</div>
+                <div class="chips" id="chips"></div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="findRecipes()">
+                    <span class="material-icons-round">auto_awesome</span>
+                    Najdi recepte
+                </button>
+                <button class="btn btn-ghost" onclick="clearAll()">
+                    <span class="material-icons-round">clear_all</span>
+                    Počisti
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats" id="statsArea" style="display:none;"></div>
+
+        <!-- Tabs -->
+        <div class="tabs" id="tabsArea" style="display:none;">
+            <button class="tab active" onclick="filterCat('all')">
+                <span class="material-icons-round">apps</span> Vse
+            </button>
+            <button class="tab" onclick="filterCat('soup')">
+                <span class="material-icons-round">soup_kitchen</span> Juhe
+            </button>
+            <button class="tab" onclick="filterCat('main')">
+                <span class="material-icons-round">dinner_dining</span> Glavne jedi
+            </button>
+            <button class="tab" onclick="filterCat('dessert')">
+                <span class="material-icons-round">cake</span> Sladice
+            </button>
+        </div>
+
+        <!-- Grid -->
+        <div class="grid" id="grid"></div>
+
+        <!-- Empty -->
+        <div class="empty" id="empty">
+            <span class="material-icons-round">menu_book</span>
+            <h3>Začnite z vnosom sestavin</h3>
+            <p>Vnesite sestavine, ki jih imate doma, ali pritisnite "Naključni predlog za kosilo" za inspiracijo.</p>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">Recept<span>ko</span></div>
+            <p>Preproste ideje za dobro hrano</p>
+            <div class="footer-copy">© 2026 Receptko — Peter H.</div>
+            <div class="footer-links">
+                <a href="#">O nas</a>
+                <a href="#">Kontakt</a>
+                <a href="#">Pogoji uporabe</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ==================== RECIPES (90+) ====================
+        const recipes = [
+            // SOUPS
+            { id:1, name:"Kremna Bučna Juha", cat:"soup", time:"30 min", diff:"Lahko", 
+              desc:"Sladkasta, kremna juha iz pečene buče s smetano in bučnimi semeni.",
+              ing:["buča","čebula","česen","smetana","bučna semena","sol","poper","olje"] },
+            { id:2, name:"Gobova Juha", cat:"soup", time:"45 min", diff:"Lahko",
+              desc:"Aromatična juha iz gozdnih gob s krompirjem in zelenjavo.",
+              ing:["gozdnje gobe","krompir","čebula","korenje","peteršilj","sol","poper","olje"] },
+            { id:3, name:"Paradižnikova Juha", cat:"soup", time:"25 min", diff:"Lahko",
+              desc:"Klasična kremna paradižnikova juha z baziliko in kruhom.",
+              ing:["paradižnik","čebula","česen","bazilika","kruh","olivno olje","sol","poper"] },
+            { id:4, name:"Piščančja Juha z Rezanci", cat:"soup", time:"40 min", diff:"Lahko",
+              desc:"Lahek prvi hod s piščancem, domačimi rezanci in zelenjavo.",
+              ing:["piščanec","rezanci","korenje","peteršilj","čebula","sol","poper"] },
+            { id:5, name:"Brokolijeva Juha", cat:"soup", time:"30 min", diff:"Lahko",
+              desc:"Kremna juha iz brokolija s sirom in smetano. Otroci jo obožujejo.",
+              ing:["brokoli","čebula","česen","sir","smetana","sol","poper","olje"] },
+            { id:6, name:"Minestrone", cat:"soup", time:"35 min", diff:"Srednja",
+              desc:"Italijanska zelenjavna juha s testeninami, fižolom in paradižnikom.",
+              ing:["paradižnik","fižol","testenine","korenje","celer","čebula","česen","sol","poper"] },
+            { id:7, name:"Juha iz Rdeče Pese", cat:"soup", time:"50 min", diff:"Lahko",
+              desc:"Barvita in zdrava juha iz pečene rdeče pese s kislo smetano.",
+              ing:["rdeča pesa","krompir","čebula","kisla smetana","sol","poper","olje"] },
+            { id:8, name:"Česnova Juha", cat:"soup", time:"35 min", diff:"Lahko",
+              desc:"Francoska klasika — kremna juha iz pečenega česna s sirom na kruhu.",
+              ing:["česen","čebula","kruh","sir","jajca","smetana","sol","poper","olje"] },
+            { id:9, name:"Tortellini v Juhi", cat:"soup", time:"20 min", diff:"Lahko",
+              desc:"Hitra juha s tortellini v paradižnikovi osnovi s sirom.",
+              ing:["tortellini","paradižnik","česen","bazilika","sir","olivno olje","sol"] },
+            { id:10, name:"Krompirjeva Juha", cat:"soup", time:"40 min", diff:"Lahko",
+              desc:"Gosta in nasitna juha iz krompirja s slanino in čebulo.",
+              ing:["krompir","slanina","čebula","mleko","sol","poper","peteršilj"] },
+            { id:11, name:"Goveja Juha", cat:"soup", time:"3 ure", diff:"Lahko",
+              desc:"Dolgo kuhana goveja juha s korenjem, krompirjem in rezanci.",
+              ing:["goveje meso","kosti","korenje","krompir","rezanci","čebula","lovor","sol","poper"] },
+            { id:12, name:"Juha iz Špinače", cat:"soup", time:"25 min", diff:"Lahko",
+              desc:"Kremna zelena juha s špinačo, krompirjem in smetano.",
+              ing:["špinača","krompir","čebula","česen","smetana","sol","poper","olje"] },
+            { id:13, name:"Ribja Juha", cat:"soup", time:"50 min", diff:"Srednja",
+              desc:"Aromatična juha iz sveže ribe, paradižnika in belega vina.",
+              ing:["sveža riba","paradižnik","čebula","belo vino","česen","peteršilj","sol","poper","olivno olje"] },
+            { id:14, name:"Ajdova Juha", cat:"soup", time:"35 min", diff:"Lahko",
+              desc:"Tradicionalna juha iz ajde s krompirjem in slanino.",
+              ing:["ajdova moka","krompir","slanina","čebula","sol","poper","olje"] },
+            { id:15, name:"Zelenjavna Kremna Juha", cat:"soup", time:"30 min", diff:"Lahko",
+              desc:"Mešana kremna juha iz sezonske zelenjave. Uporabi kar imaš.",
+              ing:["korenje","krompir","čebula","celer","smetana","sol","poper","olje"] },
+
+            // MAIN DISHES
+            { id:16, name:"Pohani Zrezki", cat:"main", time:"30 min", diff:"Lahko",
+              desc:"Hrskavi pohani svinjski zrezki v jajčni in krušni oblivi.",
+              ing:["svinjsko meso","jajca","moka","krušne drobtine","sol","poper","olje"] },
+            { id:17, name:"Pire Krompir", cat:"main", time:"25 min", diff:"Lahko",
+              desc:"Mehki in kremni pire krompir z maslom in mlekom. Najboljša priloga.",
+              ing:["krompir","maslo","mleko","sol","poper","muškatni orešček"] },
+            { id:18, name:"Pražen Krompir", cat:"main", time:"35 min", diff:"Lahko",
+              desc:"Zlatorjavi krompir dušen s čebulo v masti. Najbolj priljubljena priloga.",
+              ing:["krompir","čebula","mast","sol","poper"] },
+            { id:19, name:"Piščanec v Smetanovi Omaki", cat:"main", time:"30 min", diff:"Lahko",
+              desc:"Sočen piščančji file v kremni smetanovi omaki s česnom in sirom.",
+              ing:["piščanec","smetana","česen","sir","sol","poper","olje","peteršilj"] },
+            { id:20, name:"Spaghetti Bolognese", cat:"main", time:"40 min", diff:"Srednja",
+              desc:"Klasične testenine z mesno omako iz paradižnika, čebule in česna.",
+              ing:["spaghetti","mlete meso","paradižnik","čebula","česen","sol","poper","olivno olje","sir"] },
+            { id:21, name:"Carbonara", cat:"main", time:"20 min", diff:"Lahko",
+              desc:"Italijanska klasika — testenine z jajci, slanino, sirom in poprom.",
+              ing:["spaghetti","slanina","jajca","parmezan","česen","poper"] },
+            { id:22, name:"Pica Margherita", cat:"main", time:"35 min", diff:"Lahko",
+              desc:"Preprosta domača pica s paradižnikom, mocarelo in baziliko.",
+              ing:["moka","kvas","paradižnik","mocarela","bazilika","olivno olje","sol"] },
+            { id:23, name:"Pohani Piščanec", cat:"main", time:"30 min", diff:"Lahko",
+              desc:"Zlatorjavi pohani piščančji zrezki v hrustljavi oblivi.",
+              ing:["piščanec","jajca","moka","krušne drobtine","sol","poper","olje"] },
+            { id:24, name:"Goveji Golaž", cat:"main", time:"90 min", diff:"Srednja",
+              desc:"Tradicionalni golaž iz govedine, čebule in paradižnika.",
+              ing:["govedina","čebula","paradižnik","paprika","česen","sol","poper","olje"] },
+            { id:25, name:"Zrezek v Gorgonzolovi Omaki", cat:"main", time:"25 min", diff:"Srednja",
+              desc:"Sočen zrezek v kremni omaki iz gorgonzole in smetane.",
+              ing:["govedina","gorgonzola","smetana","čebula","sol","poper","olje"] },
+            { id:26, name:"Losos iz Pečice", cat:"main", time:"25 min", diff:"Lahko",
+              desc:"Sočen losos pečen s limono, česnom in rožmarinom.",
+              ing:["losos","limona","česen","rožmarin","olivno olje","sol","poper"] },
+            { id:27, name:"Taco z Mletim Mesom", cat:"main", time:"25 min", diff:"Lahko",
+              desc:"Mehke tortilje polnjene z mletim mesom, zelenjavo in sirom.",
+              ing:["tortilje","mlete meso","paradižnik","solata","sir","čebula","česen","sol","poper"] },
+            { id:28, name:"Rižota s Piščancem", cat:"main", time:"35 min", diff:"Srednja",
+              desc:"Kremna rižota s piščancem, gobami in parmezanom.",
+              ing:["riž","piščanec","gobe","čebula","belo vino","parmezan","sol","poper","olje"] },
+            { id:29, name:"Zelenjavna Rižota", cat:"main", time:"30 min", diff:"Lahko",
+              desc:"Barvita rižota s paradižnikom, bučko, papriko in sirom.",
+              ing:["riž","paradižnik","bučka","paprika","čebula","parmezan","sol","poper","olje"] },
+            { id:30, name:"Palačinke s Piščancem", cat:"main", time:"40 min", diff:"Srednja",
+              desc:"Slane palačinke polnjene s piščancem in gobami v kremni omaki.",
+              ing:["moka","jajca","mleko","piščanec","gobe","smetana","sol","poper","maslo"] },
+            { id:31, name:"Sarme", cat:"main", time:"2 uri", diff:"Srednja",
+              desc:"Kislo zelje polnjeno z mesom in rižem, dušeno v paradižnikovi omaki.",
+              ing:["kislo zelje","mlete meso","riž","paradižnik","čebula","sol","poper","paprika"] },
+            { id:32, name:"Pasta Pesto", cat:"main", time:"15 min", diff:"Lahko",
+              desc:"Najhitrejša večerja — testenine s pestom iz bazilike, pinij in parmezana.",
+              ing:["testenine","bazilika","pinije","parmezan","česen","olivno olje","sol"] },
+            { id:33, name:"Piščančji Curry", cat:"main", time:"30 min", diff:"Lahko",
+              desc:"Aromatičen curry s piščancem, kokosovim mlekom in rižem.",
+              ing:["piščanec","curry","kokosovo mleko","riž","čebula","česen","sol","poper","olje"] },
+            { id:34, name:"Zrezek v Poprovi Omaki", cat:"main", time:"25 min", diff:"Srednja",
+              desc:"Sočen goveji zrezek v kremni poprovi omaki.",
+              ing:["govedina","smetana","zeleni poper","čebula","sol","poper","olje","konjak"] },
+            { id:35, name:"Lazanja", cat:"main", time:"60 min", diff:"Srednja",
+              desc:"Plastenata italijanska klasika z mesno omako, bešamelom in sirom.",
+              ing:["lazanja listi","mlete meso","paradižnik","mleko","maslo","moka","sir","sol","poper"] },
+            { id:36, name:"Omleta s Šunko in Sirom", cat:"main", time:"10 min", diff:"Lahko",
+              desc:"Hitra in nasitna omleta s šunko, sirom in zelišči.",
+              ing:["jajca","šunka","sir","maslo","sol","poper","peteršilj"] },
+            { id:37, name:"Zelenjavna Frittata", cat:"main", time:"25 min", diff:"Lahko",
+              desc:"Italijanska pečena omleta s paradižnikom, špinačo in sirom.",
+              ing:["jajca","paradižnik","špinača","sir","čebula","sol","poper","olje"] },
+            { id:38, name:"Grilled Cheese Sendvič", cat:"main", time:"10 min", diff:"Lahko",
+              desc:"Hrustljav toast z rastopljenim sirom. Klasična udobna hrana.",
+              ing:["kruh","sir","maslo","paradižnik"] },
+            { id:39, name:"Pica s Šunko in Gobami", cat:"main", time:"40 min", diff:"Lahko",
+              desc:"Domača pica s paradižnikovo omako, šunko, gobami in mocarelo.",
+              ing:["moka","kvas","paradižnik","šunka","gobe","mocarela","olivno olje","sol"] },
+            { id:40, name:"Čili Con Carne", cat:"main", time:"45 min", diff:"Srednja",
+              desc:"Pikantna mehiška jed z mletim mesom, fižolom in paradižnikom.",
+              ing:["mlete meso","fižol","paradižnik","čebula","čili","česen","sol","poper","olje"] },
+            { id:41, name:"Zrezek na Žaru", cat:"main", time:"20 min", diff:"Lahko",
+              desc:"Mariniran goveji zrezek pečen na žaru ali ponevi.",
+              ing:["govedina","česen","rožmarin","olivno olje","sol","poper","limona"] },
+            { id:42, name:"Piščančji Nuggetsi", cat:"main", time:"25 min", diff:"Lahko",
+              desc:"Hrskavi domači piščančji nuggetsi v krušni oblivi.",
+              ing:["piščanec","jajca","moka","krušne drobtine","sol","poper","olje"] },
+            { id:43, name:"Svinjska Ribs s BBQ Omako", cat:"main", time:"90 min", diff:"Srednja",
+              desc:"Mehke svinjske rebra pečene v domači BBQ omaki.",
+              ing:["svinjska rebra","bbq omaka","med","česen","sol","poper","paprika"] },
+            { id:44, name:"Špageti Aglio e Olio", cat:"main", time:"15 min", diff:"Lahko",
+              desc:"Preprosti špageti s česnom, olivnim oljem in čilijem.",
+              ing:["spaghetti","česen","olivno olje","čili","peteršilj","sol"] },
+            { id:45, name:"Pita Gyros", cat:"main", time:"30 min", diff:"Lahko",
+              desc:"Grška klasika — mehka pita polnjena s piščancem, solato in tzatziki omako.",
+              ing:["pita","piščanec","solata","paradižnik","čebula","jogurt","kumara","česen","sol"] },
+            { id:46, name:"Zrezek v Šampinjonovi Omaki", cat:"main", time:"30 min", diff:"Srednja",
+              desc:"Sočen zrezek v kremni omaki iz šampinjonov in smetane.",
+              ing:["govedina","šampinjoni","smetana","čebula","česen","sol","poper","olje"] },
+            { id:47, name:"Polnjene Paprike", cat:"main", time:"60 min", diff:"Srednja",
+              desc:"Paprike polnjene z mletim mesom in rižem, pečene v paradižnikovi omaki.",
+              ing:["paprika","mlete meso","riž","paradižnik","čebula","sol","poper","paprika"] },
+            { id:48, name:"Ajdovi Žganci s Slanino", cat:"main", time:"20 min", diff:"Lahko",
+              desc:"Tradicionalni ajdovi žganci s slanino in ocvirki.",
+              ing:["ajdova moka","voda","sol","slanina","ocvirki","kislo mleko"] },
+            { id:49, name:"Prašiček v Zelju", cat:"main", time:"2 uri", diff:"Srednja",
+              desc:"Svinjsko meso dušeno v kislem zelju s krompirjem.",
+              ing:["svinjsko meso","kislo zelje","krompir","čebula","sol","poper","kumina"] },
+            { id:50, name:"Testenine s Tunom", cat:"main", time:"20 min", diff:"Lahko",
+              desc:"Hitra večerja — testenine z tuno, čebulo in paradižnikom.",
+              ing:["testenine","tuna","čebula","paradižnik","česen","olivno olje","sol","poper"] },
+            { id:51, name:"Zelenjavna Paella", cat:"main", time:"45 min", diff:"Srednja",
+              desc:"Španska rižota s šafranom, zelenjavo in morskimi sadeži.",
+              ing:["riž","šafran","paprika","paradižnik","čebula","česen","sol","poper","olivno olje"] },
+            { id:52, name:"Svinjski Zrezek v Smetani", cat:"main", time:"25 min", diff:"Lahko",
+              desc:"Sočen svinjski zrezek v preprosti smetanovi omaki s česnom.",
+              ing:["svinjsko meso","smetana","česen","sol","poper","olje","peteršilj"] },
+            { id:53, name:"Bučke Polnjene s Sirom", cat:"main", time:"35 min", diff:"Lahko",
+              desc:"Pečene bučke polnjene z sirom, paradižnikom in zelišči.",
+              ing:["bučka","sir","paradižnik","česen","bazilika","sol","poper","olivno olje"] },
+            { id:54, name:"Riž s Piščancem in Zelenjavo", cat:"main", time:"30 min", diff:"Lahko",
+              desc:"Hitro enolončnica s piščancem, rižem in sezonsko zelenjavo.",
+              ing:["riž","piščanec","korenje","čebula","česen","sol","poper","olje","sojina omaka"] },
+            { id:55, name:"Pica s Špinačo in Feto", cat:"main", time:"35 min", diff:"Lahko",
+              desc:"Domača pica s špinačo, feto, paradižnikom in olivami.",
+              ing:["moka","kvas","paradižnik","špinača","feta","olive","olivno olje","sol"] },
+            { id:56, name:"Goveji Stroganoff", cat:"main", time:"30 min", diff:"Srednja",
+              desc:"Rusi klasika — trakovi govedine v kremni gobovi omaki.",
+              ing:["govedina","gobe","smetana","čebula","česen","sol","poper","olje","kečap"] },
+            { id:57, name:"Pohane Ribe s Pirejem", cat:"main", time:"35 min", diff:"Lahko",
+              desc:"Hrskave pohane ribe s krompirjevim pirejem in limono.",
+              ing:["ribe","jajca","moka","krušne drobtine","krompir","maslo","mleko","sol","poper","limona"] },
+            { id:58, name:"Zapečene Testenine s Sirom", cat:"main", time:"30 min", diff:"Lahko",
+              desc:"Testenine zapečene z mocarelo in paradižnikom.",
+              ing:["testenine","mocarela","paradižnik","česen","bazilika","olivno olje","sol","poper"] },
+            { id:59, name:"Piščančji Paprikaš", cat:"main", time:"45 min", diff:"Srednja",
+              desc:"Madžarska klasika — piščanec v omaki iz paprike, paradižnika in čebule.",
+              ing:["piščanec","paprika","paradižnik","čebula","česen","sol","poper","paprika","olje"] },
+            { id:60, name:"Solatek s Tunom in Jajci", cat:"main", time:"15 min", diff:"Lahko",
+              desc:"Hiter in zdrav solatek s tuno, kuhanimi jajci in zelenjavo.",
+              ing:["tuna","jajca","solata","paradižnik","kumara","čebula","olivno olje","sol","poper"] },
+
+            // DESSERTS
+            { id:61, name:"Čokoladni Browniji", cat:"dessert", time:"40 min", diff:"Lahko",
+              desc:"Gosti in mokri browniji z intenzivnim čokoladnim okusom.",
+              ing:["čokolada","maslo","jajca","sladkor","moka","kakav","vanilija","sol"] },
+            { id:62, name:"Palačinke", cat:"dessert", time:"20 min", diff:"Lahko",
+              desc:"Mehke in tanke palačinke z marmelado, Nutello ali sladoledom.",
+              ing:["moka","jajca","mleko","maslo","sladkor","marmelada","nutella"] },
+            { id:63, name:"Jabolčna Pita", cat:"dessert", time:"60 min", diff:"Srednja",
+              desc:"Topla pita s cimetom in jabolki v hrustljavem testu.",
+              ing:["moka","jabolka","cimet","sladkor","maslo","jajca","limona"] },
+            { id:64, name:"Tiramisu", cat:"dessert", time:"30 min", diff:"Lahko",
+              desc:"Italijanska klasika — piškoti namočeni v kavi, mascarpone krema in kakav.",
+              ing:["piškoti","kava","mascarpone","jajca","sladkor","kakav","amaretto"] },
+            { id:65, name:"Čokoladni Mousse", cat:"dessert", time:"20 min", diff:"Lahko",
+              desc:"Pena iz temne čokolade in stepene smetane.",
+              ing:["čokolada","smetana","jajca","sladkor","vanilija"] },
+            { id:66, name:"Banana Bread", cat:"dessert", time:"60 min", diff:"Lahko",
+              desc:"Vlažen kruh iz zrelih banan z orehi in cimetom.",
+              ing:["banane","moka","jajca","maslo","sladkor","orehi","cimet","vanilija"] },
+            { id:67, name:"Cheesecake", cat:"dessert", time:"90 min", diff:"Srednja",
+              desc:"Kremna skutina torta na osnovi iz piškotov s sadnim prelivom.",
+              ing:["skuta","sladkor","jajca","maslo","piškoti","vanilija","limona","smetana"] },
+            { id:68, name:"Crepes Suzette", cat:"dessert", time:"25 min", diff:"Srednja",
+              desc:"Tanke francoske palačinke v omaki iz pomaranč in karameliziranega sladkorja.",
+              ing:["moka","jajca","mleko","pomaranče","sladkor","maslo","cointreau"] },
+            { id:69, name:"Sacher Torta", cat:"dessert", time:"90 min", diff:"Težka",
+              desc:"Dunajska klasika — čokoladna torta z marelično marmelado in temno glazuro.",
+              ing:["čokolada","jajca","maslo","sladkor","moka","marelična marmelada","kakav"] },
+            { id:70, name:"Profiteroli", cat:"dessert", time:"50 min", diff:"Srednja",
+              desc:"Majhne testne kroglice polnjene s smetano, prelite s čokoladno omako.",
+              ing:["moka","jajca","maslo","voda","smetana","čokolada","sladkor","vanilija"] },
+            { id:71, name:"Makove Štruklje", cat:"dessert", time:"45 min", diff:"Srednja",
+              desc:"Sladki zaviti žepki polnjeni z makom, sladkorjem in roznami.",
+              ing:["moka","jajca","mak","sladkor","rozine","maslo","mleko","vanilija"] },
+            { id:72, name:"Čokoladni Lava Cake", cat:"dessert", time:"25 min", diff:"Srednja",
+              desc:"Majhne čokoladne tortice s tekočim sredinom.",
+              ing:["čokolada","maslo","jajca","sladkor","moka","vanilija"] },
+            { id:73, name:"Krofi", cat:"dessert", time:"2 uri", diff:"Srednja",
+              desc:"Mehki kvašeni krofi ocvrti do zlatorjave barve, napolnjeni z marmelado.",
+              ing:["moka","jajca","kvas","mleko","maslo","sladkor","marmelada","olje"] },
+            { id:74, name:"Jagodna Torta", cat:"dessert", time:"60 min", diff:"Srednja",
+              desc:"Lahka torta s svežimi jagodami in stepeno smetano.",
+              ing:["moka","jajca","sladkor","maslo","jagode","smetana","vanilija"] },
+            { id:75, name:"Piškoti s Čokolado", cat:"dessert", time:"30 min", diff:"Lahko",
+              desc:"Mehki piškoti s koščki čokolade.",
+              ing:["moka","maslo","sladkor","jajca","čokolada","vanilija","sol","pecilni prašek"] },
+            { id:76, name:"Panna Cotta", cat:"dessert", time:"20 min", diff:"Lahko",
+              desc:"Italijanska kremna sladica iz sladke smetane z jagodnim prelivom.",
+              ing:["smetana","sladkor","želatina","vanilija","jagode","limona"] },
+            { id:77, name:"Ricottini Žepki", cat:"dessert", time:"35 min", diff:"Lahko",
+              desc:"Mehki žepki iz listnatega testa polnjeni z ricotto in čokolado.",
+              ing:["listnato testo","ricotta","čokolada","jajce","sladkor","vanilija"] },
+            { id:78, name:"Medeni Kruhek", cat:"dessert", time:"50 min", diff:"Lahko",
+              desc:"Dišeč medeni kruh z začimbami. Odličen s kavo ali čajem.",
+              ing:["med","moka","jajca","maslo","sladkor","cimet","klinčki","pecilni prašek"] },
+            { id:79, name:"Sadni Crumble", cat:"dessert", time:"40 min", diff:"Lahko",
+              desc:"Topel sadni crumble z masleno ovseno posipko.",
+              ing:["jabolka","sladkor","maslo","moka","oves","cimet","vanilija"] },
+            { id:80, name:"Čokoladne Truffles", cat:"dessert", time:"30 min", diff:"Lahko",
+              desc:"Luksuzne čokoladne kroglice iz temne čokolade in smetane.",
+              ing:["čokolada","smetana","maslo","kakav","vanilija"] },
+            { id:81, name:"Skutina Torta", cat:"dessert", time:"50 min", diff:"Lahko",
+              desc:"Lahka in kremna torta iz skute z roznami in limono.",
+              ing:["skuta","jajca","sladkor","maslo","moka","rozine","limona","vanilija"] },
+            { id:82, name:"Češnjev Clafoutis", cat:"dessert", time:"40 min", diff:"Lahko",
+              desc:"Francoska pečena sladica s češnjami v jajčni kremi.",
+              ing:["češnje","jajca","mleko","sladkor","moka","maslo","vanilija"] },
+            { id:83, name:"Kokosove Krogle", cat:"dessert", time:"25 min", diff:"Lahko",
+              desc:"Hiter in enostaven sladica iz kokosa, kondenziranega mleka in čokolade.",
+              ing:["kokos","kondenzirano mleko","čokolada","maslo","vanilija"] },
+            { id:84, name:"Jabolčni Zavitek", cat:"dessert", time:"45 min", diff:"Lahko",
+              desc:"Zaviti jabolčni žepki v listnatem testu s cimetom in sladkorjem.",
+              ing:["listnato testo","jabolka","cimet","sladkor","maslo","jajce"] },
+            { id:85, name:"Čokoladna Fondue", cat:"dessert", time:"15 min", diff:"Lahko",
+              desc:"Topla čokolada za pomakanje sadja, piškotov ali kruha.",
+              ing:["čokolada","smetana","maslo","vanilija","sadje","piškoti"] },
+            { id:86, name:"Makova Potica", cat:"dessert", time:"3 ure", diff:"Težka",
+              desc:"Tradicionalna potica z makovim nadevom. Za praznike in nedelje.",
+              ing:["moka","jajca","kvas","mleko","maslo","sladkor","mak","vanilija","limona"] },
+            { id:87, name:"Orehovi Žepki", cat:"dessert", time:"40 min", diff:"Srednja",
+              desc:"Mehki testeni žepki polnjeni z orehi, medom in cimetom.",
+              ing:["moka","jajca","orehi","med","cimet","sladkor","maslo","vanilija"] },
+            { id:88, name:"Jogurtova Torta", cat:"dessert", time:"35 min", diff:"Lahko",
+              desc:"Lahka torta iz jogurta z jagodami in piškotno osnovo.",
+              ing:["jogurt","sladkor","jajca","moka","maslo","piškoti","jagode","vanilija"] },
+            { id:89, name:"Breskov Crumble", cat:"dessert", time:"40 min", diff:"Lahko",
+              desc:"Topel breskov crumble z vanilijevo omako.",
+              ing:["breskve","moka","sladkor","maslo","oves","vanilija","cimet"] },
+            { id:90, name:"Čokoladna Pavlova", cat:"dessert", time:"60 min", diff:"Srednja",
+              desc:"Hrskava bezgova tortica s stepeno smetano in čokolado.",
+              ing:["jajca","sladkor","čokolada","smetana","vanilija","kakav"] }
+        ];
+
+        // Common ingredients for quick-add chips
+        const commonIngredients = [
+            "jajca", "moka", "krompir", "čebula", "česen", "piščanec", "svinjina",
+            "govedina", "paradižnik", "sir", "smetana", "mleko", "maslo", "riž",
+            "testenine", "kruh", "jabolka", "banane", "čokolada", "sladkor", "sol",
+            "poper", "olje", "limona", "korenje", "gobe", "slanina", "šunka"
+        ];
+
+        let userIngredients = [];
+        let currentFilter = 'all';
+
+        // ==================== SMART MATCHING ====================
+        function ingredientsMatch(userInput, recipeIng) {
+            const user = userInput.toLowerCase().trim();
+            const recipe = recipeIng.toLowerCase().trim();
+            
+            // Direct substring match
+            if (recipe.includes(user) || user.includes(recipe)) return true;
+            
+            // Special cases for Slovenian grammar variations
+            const pairs = [
+                ["jajca", "jajce"], ["jajce", "jajca"],
+                ["drobtine", "krušne drobtine"], ["krušne", "drobtine"],
+                ["mlete", "mlete meso"], ["mleto", "mlete meso"],
+                ["svinjina", "svinjsko meso"], ["svinjsko", "svinjina"],
+                ["govedina", "goveje meso"], ["goveje", "govedina"],
+                ["piščančji", "piščanec"], ["piščanec", "piščančji"],
+                ["smetana", "kisla smetana"], ["kisla", "smetana"],
+                ["mleko", "kokosovo mleko"], ["kokosovo", "mleko"],
+                ["krompir", "pire krompir"], ["pire", "krompir"],
+                ["testenine", "spaghetti"], ["spaghetti", "testenine"],
+                ["zelje", "kislo zelje"], ["kislo", "zelje"],
+                ["gobe", "gozdnje gobe"], ["gozdnje", "gobe"],
+                ["kruh", "stari kruh"], ["stari", "kruh"],
+                ["riž", "basmati riž"], ["basmati", "riž"],
+                ["olje", "olivno olje"], ["olivno", "olje"],
+                ["čebula", "rdeča čebula"], ["rdeča", "čebula"],
+                ["česen", "česnov prah"], ["česnov", "česen"],
+                ["korenje", "mlado korenje"], ["mlado", "korenje"],
+                ["paprika", "rdeča paprika"], ["rdeča", "paprika"],
+                ["poper", "zeleni poper"], ["zeleni", "poper"],
+                ["cimet", "cejlonski cimet"], ["cejlonski", "cimet"],
+                ["čokolada", "temna čokolada"], ["temna", "čokolada"],
+                ["orehi", "lešniki"], ["lešniki", "orehi"],
+                ["jabolka", "jabolko"], ["jabolko", "jabolka"],
+                ["banane", "banana"], ["banana", "banane"],
+                ["jagode", "jagoda"], ["jagoda", "jagode"],
+                ["limona", "limonin sok"], ["limonin", "limona"],
+                ["pomaranče", "pomarančni sok"], ["pomarančni", "pomaranče"],
+                ["fižol", "rdeči fižol"], ["rdeči", "fižol"],
+                ["vino", "belo vino"], ["belo", "vino"],
+                ["rum", "temni rum"], ["temni", "rum"],
+                ["skuta", "ricotta"], ["ricotta", "skuta"],
+                ["kvas", "suhi kvas"], ["suhi", "kvas"],
+                ["pecilni", "pecilni prašek"], ["prašek", "pecilni"],
+                ["vanilija", "vanilijev sladkor"], ["vanilijev", "vanilija"],
+                ["tortilje", "tortilla"], ["tortilla", "tortilje"],
+                ["jogurt", "grški jogurt"], ["grški", "jogurt"],
+                ["slanina", "panceta"], ["panceta", "slanina"],
+                ["šunka", "pršut"], ["pršut", "šunka"],
+                ["kumara", "kisla kumara"], ["kisla", "kumara"],
+                ["solata", "ledena solata"], ["ledena", "solata"],
+                ["čili", "čili prah"], ["prah", "čili"],
+                ["curry", "curry prah"], ["prah", "curry"],
+                ["kakav", "kakav v prahu"], ["prah", "kakav"],
+                ["muškatni", "muškat"], ["muškat", "muškatni"],
+                ["želatina", "agar agar"], ["agar", "želatina"],
+                ["tuna", "konzervirana tuna"], ["konzervirana", "tuna"],
+                ["bučka", "tikvica"], ["tikvica", "bučka"],
+                ["šafran", "šafranove niti"], ["niti", "šafran"],
+                ["sojina", "soja"], ["soja", "sojina"],
+                ["kečap", "paradižnikov kečap"], ["paradižnikov", "kečap"],
+                ["olive", "črne olive"], ["črne", "olive"],
+                ["kondenzirano", "sladko kondenzirano"], ["sladko", "kondenzirano"],
+                ["kokos", "kokosova moka"], ["kokosova", "kokos"],
+                ["češnje", "maraschino češnje"], ["maraschino", "češnje"],
+                ["oves", "ovseni kosmiči"], ["ovseni", "oves"],
+                ["nutella", "lešnikov namaz"], ["lešnikov", "nutella"],
+                ["marmelada", "marelična marmelada"], ["marelična", "marmelada"],
+                ["listnato", "sladkorno listnato"], ["sladkorno", "listnato"],
+                ["kava", "espresso"], ["espresso", "kava"],
+                ["piškoti", "digestive piškoti"], ["digestive", "piškoti"],
+                ["ocvirki", "svinjski ocvirki"], ["svinjski", "ocvirki"],
+                ["celer", "korenček celerja"], ["korenček", "celer"],
+                ["lovor", "lovorjev list"], ["lovorjev", "lovor"],
+                ["jajčni", "domači rezanci"], ["domači", "jajčni"],
+                ["kosti", "goveje kosti"], ["goveje", "kosti"],
+                ["sveža", "sveža riba"], ["riba", "sveža"],
+                ["ribe", "bela riba"], ["bela", "ribe"],
+                ["kumina", "mleta kumina"], ["mleta", "kumina"],
+                ["sadje", "sezonsko sadje"], ["sezonsko", "sadje"],
+                ["prašek", "pecilni prašek"], ["pecilni", "prašek"],
+                ["maslo", "stopljeno maslo"], ["stopljeno", "maslo"],
+                ["sol", "morska sol"], ["morska", "sol"],
+                ["sladkor", "rjav sladkor"], ["rjav", "sladkor"]
+            ];
+            
+            for (let [a, b] of pairs) {
+                if ((user === a && recipe.includes(b)) || (user === b && recipe.includes(a))) return true;
+            }
+            
+            return false;
+        }
+
+        // ==================== INIT ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            renderChips();
+            const inp = document.getElementById('ingredientInput');
+            inp.addEventListener('keypress', e => {
+                if (e.key === 'Enter') { addIng(inp.value.trim()); inp.value = ''; }
+            });
+        });
+
+        function renderChips() {
+            document.getElementById('chips').innerHTML = commonIngredients.map(i => `
+                <div class="chip" onclick="addIng('${i}')">+ ${i}</div>
+            `).join('');
+        }
+
+        function addIng(val) {
+            if (!val) return;
+            const n = val.toLowerCase().trim();
+            if (!userIngredients.includes(n)) {
+                userIngredients.push(n);
+                renderTags();
+            }
+        }
+
+        function removeIng(v) {
+            userIngredients = userIngredients.filter(x => x !== v);
+            renderTags();
+            if (userIngredients.length === 0) resetView();
+        }
+
+        function renderTags() {
+            const el = document.getElementById('tagsArea');
+            if (!userIngredients.length) { el.innerHTML = ''; return; }
+            el.innerHTML = userIngredients.map(i => `
+                <div class="tag">${i}<span class="remove" onclick="removeIng('${i}')">×</span></div>
+            `).join('');
+        }
+
+        function clearAll() {
+            userIngredients = [];
+            renderTags();
+            resetView();
+            closeRandom();
+        }
+
+        function resetView() {
+            document.getElementById('grid').innerHTML = '';
+            document.getElementById('empty').style.display = 'block';
+            document.getElementById('statsArea').style.display = 'none';
+            document.getElementById('tabsArea').style.display = 'none';
+        }
+
+        // ==================== RANDOM LUNCH ====================
+        function suggestRandomLunch() {
+            const mains = recipes.filter(r => r.cat === 'main');
+            const r = mains[Math.floor(Math.random() * mains.length)];
+            
+            document.getElementById('randomTitle').textContent = r.name;
+            document.getElementById('randomMeta').innerHTML = `
+                <span><span class="material-icons-round" style="font-size:1rem;">schedule</span> ${r.time}</span>
+                <span><span class="material-icons-round" style="font-size:1rem;">trending_up</span> ${r.diff}</span>
+                <span><span class="material-icons-round" style="font-size:1rem;">restaurant_menu</span> ${r.ing.length} sestavin</span>
+            `;
+            document.getElementById('randomDesc').textContent = r.desc;
+            document.getElementById('randomIngredients').innerHTML = r.ing.map(i => 
+                `<span class="random-ing">${i}</span>`
+            ).join('');
+            
+            const box = document.getElementById('randomResult');
+            box.classList.remove('show');
+            void box.offsetWidth;
+            box.classList.add('show');
+            box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function closeRandom() {
+            document.getElementById('randomResult').classList.remove('show');
+        }
+
+        // ==================== FIND RECIPES ====================
+        function findRecipes() {
+            if (!userIngredients.length) { alert('Najprej vnesite vsaj eno sestavino!'); return; }
+
+            const results = recipes.map(r => {
+                const matched = r.ing.filter(ing => 
+                    userIngredients.some(ui => ingredientsMatch(ui, ing))
+                );
+                const rate = matched.length / r.ing.length;
+                return { ...r, matched, rate, count: matched.length };
+            }).sort((a, b) => b.rate - a.rate);
+
+            renderGrid(results);
+            updateStats(results);
+        }
+
+        function renderGrid(data) {
+            const grid = document.getElementById('grid');
+            const empty = document.getElementById('empty');
+            const tabs = document.getElementById('tabsArea');
+            const stats = document.getElementById('statsArea');
+
+            if (!data.length) {
+                grid.innerHTML = '';
+                empty.style.display = 'block';
+                tabs.style.display = 'none';
+                stats.style.display = 'none';
+                return;
+            }
+
+            empty.style.display = 'none';
+            tabs.style.display = 'flex';
+            stats.style.display = 'grid';
+
+            const filtered = currentFilter === 'all' ? data : data.filter(r => r.cat === currentFilter);
+
+            if (!filtered.length) {
+                grid.innerHTML = `
+                    <div class="empty" style="grid-column:1/-1;">
+                        <span class="material-icons-round">search_off</span>
+                        <h3>Ni rezultatov</h3>
+                        <p>Poskusite drugo kategorijo ali dodajte več sestavin.</p>
+                    </div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(r => {
+                const pct = Math.round(r.rate * 100);
+                let cls = 'low', lbl = 'Nizek';
+                if (pct >= 70) { cls = 'high'; lbl = 'Odlično'; }
+                else if (pct >= 40) { cls = 'mid'; lbl = 'Dobro'; }
+
+                const catName = r.cat === 'soup' ? 'Juha' : r.cat === 'main' ? 'Glavna jed' : 'Sladica';
+                const catIcon = r.cat === 'soup' ? 'soup_kitchen' : r.cat === 'main' ? 'dinner_dining' : 'cake';
+
+                return `
+                    <div class="recipe-card" data-cat="${r.cat}">
+                        <div class="recipe-top ${r.cat}">
+                            <span class="recipe-badge">
+                                <span class="material-icons-round" style="font-size:0.8rem;">${catIcon}</span> ${catName}
+                            </span>
+                            <h3>${r.name}</h3>
+                            <div class="recipe-sub">
+                                <span class="material-icons-round" style="font-size:0.9rem;">schedule</span> ${r.time} · ${r.diff}
+                            </div>
+                        </div>
+                        <div class="recipe-body">
+                            <p class="recipe-desc">${r.desc}</p>
+                            <div class="ingredients-box">
+                                <div class="ing-title">
+                                    <span class="material-icons-round" style="font-size:0.9rem;">list</span> Sestavine
+                                </div>
+                                <div class="ing-list">
+                                    ${r.ing.map(ing => {
+                                        const has = r.matched.includes(ing);
+                                        return `<span class="ing-tag ${has ? 'have' : 'missing'}">
+                                            <span class="material-icons-round" style="font-size:0.7rem;">${has ? 'check_circle' : 'radio_button_unchecked'}</span>
+                                            ${ing}
+                                        </span>`;
+                                    }).join('')}
+                                </div>
+                            </div>
+                            <div class="match-bar">
+                                <div class="bar-track"><div class="bar-fill ${cls}" style="width:${pct}%"></div></div>
+                                <span class="match-text">${pct}% ${lbl}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateStats(data) {
+            const matched = data.filter(r => r.rate > 0);
+            document.getElementById('statsArea').innerHTML = `
+                <div class="stat-card"><div class="stat-num">${data.length}</div><div class="stat-label">Skupno</div></div>
+                <div class="stat-card"><div class="stat-num" style="color:var(--green);">${matched.length}</div><div class="stat-label">Ustreza</div></div>
+                <div class="stat-card"><div class="stat-num" style="color:var(--yellow);">${matched.filter(r=>r.cat==='soup').length}</div><div class="stat-label">Juhe</div></div>
+                <div class="stat-card"><div class="stat-num" style="color:var(--green);">${matched.filter(r=>r.cat==='main').length}</div><div class="stat-label">Glavne</div></div>
+                <div class="stat-card"><div class="stat-num" style="color:var(--purple);">${matched.filter(r=>r.cat==='dessert').length}</div><div class="stat-label">Sladice</div></div>
+            `;
+        }
+
+        function filterCat(c) {
+            currentFilter = c;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            if (userIngredients.length) findRecipes();
+        }
+    </script>
+</body>
+</html>
