@@ -701,7 +701,7 @@
     </header>
 
     <div class="container">
-        <!-- Random Result -->
+
         <div class="random-result" id="randomResult">
             <div class="random-badge">
                 <span class="material-icons-round" style="font-size:1rem;">restaurant</span>
@@ -722,7 +722,7 @@
             </div>
         </div>
 
-        <!-- Input -->
+
         <div class="input-card">
             <h2 class="section-title">
                 <span class="material-icons-round" style="color:var(--accent);">kitchen</span>
@@ -755,10 +755,10 @@
             </div>
         </div>
 
-        <!-- Stats -->
+
         <div class="stats" id="statsArea" style="display:none;"></div>
 
-        <!-- Tabs -->
+
         <div class="tabs" id="tabsArea" style="display:none;">
             <button class="tab active" onclick="filterCat('all')">
                 <span class="material-icons-round">apps</span> Vse
@@ -774,10 +774,10 @@
             </button>
         </div>
 
-        <!-- Grid -->
+
         <div class="grid" id="grid"></div>
 
-        <!-- Empty -->
+
         <div class="empty" id="empty">
             <span class="material-icons-round">menu_book</span>
             <h3>Začni z vnosom sestavin</h3>
@@ -791,17 +791,15 @@
             <p>Preproste ideje za dobro hrano</p>
             <div class="footer-copy">© 2026 Receptko — Peter H.</div>
             <div class="footer-links">
-                <a href="#">O nas</a>
-                <a href="#">Kontakt</a>
-                <a href="#">Pogoji uporabe</a>
+                <a href="#"></a>
+                <a href="#"></a>
+                <a href="#"></a>
             </div>
         </div>
     </footer>
 
     <script>
-        // ==================== GRAMATICAL CORRECTNESS HELPERS ====================
-        // Slovenian consonant harmony: z before voiced consonants and vowels, s before voiceless
-        // + proper noun declensions (skloni) for ingredient lists
+
 
         function startsWithVoicedOrVowel(word) {
             const first = word.charAt(0).toLowerCase();
@@ -817,11 +815,11 @@
         }
 
         function getPreposition(word, basePrep) {
-            // z/s rule: s before voiceless consonants (p, t, k, f, h, c, č, š), z before voiced and vowels
+
             const first = word.charAt(0).toLowerCase();
             const voiceless = 'ptkfhcčšs';
             if (voiceless.includes(first)) return 's';
-            // Special: z before s + voiced consonant (zdravje, zglob)
+
             if (word.toLowerCase().startsWith('z') && word.length > 1) {
                 const second = word.charAt(1).toLowerCase();
                 if ('bdgjlmnrvž'.includes(second)) return 'z';
@@ -829,9 +827,9 @@
             return 'z';
         }
 
-        // Proper declension for ingredients (rodilnik - 2. sklon, množina where appropriate)
+
         const declensions = {
-            // 1. sklon (imenovalnik) -> 2. sklon (rodilnik) for singular, or množina form
+
             "jajca": "jajc", "jajce": "jajc",
             "moka": "moke", "moko": "moke",
             "krompir": "krompirja", "krompirja": "krompirja",
@@ -970,7 +968,7 @@
         }
 
         function declineAdjective(adjective, noun) {
-            // Simple declension matching for adjective-noun agreement
+
             const adjMap = {
                 "kisla smetana": "kisla smetana",
                 "sladka smetana": "sladke smetane",
@@ -1309,9 +1307,9 @@
             return adjMap[adjective + " " + noun] || adjective;
         }
 
-        // ==================== RECIPES (90+) ====================
+
         const recipes = [
-            // SOUPS
+
             { id:1, name:"Kremna bučna juha", cat:"soup", time:"30 min", diff:"Lahko", 
               desc:"Sladkasta, kremna juha iz pečene buče s smetano in bučnimi semeni.",
               ing:["buča","čebula","česen","smetana","bučna semena","sol","poper","olje"] },
@@ -1358,7 +1356,7 @@
               desc:"Mešana kremna juha iz sezonske zelenjave. Uporabi kar imaš.",
               ing:["korenje","krompir","čebula","celer","smetana","sol","poper","olje"] },
 
-            // MAIN DISHES
+
             { id:16, name:"Pohani zrezki", cat:"main", time:"30 min", diff:"Lahko",
               desc:"Hrskavi pohani svinjski zrezki v jajčni in krušni oblivi.",
               ing:["svinjsko meso","jajca","moka","krušne drobtine","sol","poper","olje"] },
@@ -1495,7 +1493,7 @@
               desc:"Hiter in zdrav solatek s tuno, kuhanimi jajci in zelenjavo.",
               ing:["tuna","jajca","solata","paradižnik","kumara","čebula","olivno olje","sol","poper"] },
 
-            // DESSERTS
+
             { id:61, name:"Čokoladni browniji", cat:"dessert", time:"40 min", diff:"Lahko",
               desc:"Gosti in mokri browniji z intenzivnim čokoladnim okusom.",
               ing:["čokolada","maslo","jajca","sladkor","moka","kakav","vanilija","sol"] },
@@ -1588,7 +1586,7 @@
               ing:["jajca","sladkor","čokolada","smetana","vanilija","kakav"] }
         ];
 
-        // Common ingredients for quick-add chips
+
         const commonIngredients = [
             "jajca", "moka", "krompir", "čebula", "česen", "piščanec", "svinjina",
             "govedina", "paradižnik", "sir", "smetana", "mleko", "maslo", "riž",
@@ -1599,15 +1597,15 @@
         let userIngredients = [];
         let currentFilter = 'all';
 
-        // ==================== SMART MATCHING ====================
+
         function ingredientsMatch(userInput, recipeIng) {
             const user = userInput.toLowerCase().trim();
             const recipe = recipeIng.toLowerCase().trim();
             
-            // Direct substring match
+
             if (recipe.includes(user) || user.includes(recipe)) return true;
             
-            // Grammar pairs for Slovenian
+
             const pairs = [
                 ["jajca", "jajce"], ["jajce", "jajca"],
                 ["drobtine", "krušne drobtine"], ["krušne", "drobtine"],
@@ -1692,7 +1690,7 @@
             return false;
         }
 
-        // ==================== INIT ====================
+
         document.addEventListener('DOMContentLoaded', () => {
             renderChips();
             const inp = document.getElementById('ingredientInput');
@@ -1744,7 +1742,7 @@
             document.getElementById('tabsArea').style.display = 'none';
         }
 
-        // ==================== RANDOM LUNCH ====================
+
         function suggestRandomLunch() {
             const mains = recipes.filter(r => r.cat === 'main');
             const r = mains[Math.floor(Math.random() * mains.length)];
@@ -1771,7 +1769,7 @@
             document.getElementById('randomResult').classList.remove('show');
         }
 
-        // ==================== FIND RECIPES ====================
+     
         function findRecipes() {
             if (!userIngredients.length) { alert('Najprej vnesi vsaj eno sestavino!'); return; }
 
