@@ -162,7 +162,7 @@
         .color-cell {
             position: relative;
             cursor: pointer;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -173,19 +173,17 @@
             min-width: 0;
             min-height: 0;
             overflow: hidden;
+            contain: layout style;
         }
 
         .color-cell:hover {
             transform: scale(1.06);
-            z-index: 20;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.5);
             border-color: var(--accent);
         }
 
         .color-cell.selected {
             border-color: var(--accent);
             box-shadow: 0 0 0 2px var(--accent-glow), 0 0 16px rgba(230, 57, 70, 0.2);
-            z-index: 10;
         }
 
         .color-cell .color-code {
@@ -197,7 +195,7 @@
             border-radius: 3px;
             background: rgba(0,0,0,0.45);
             color: #fff;
-            backdrop-filter: blur(4px);
+            
             letter-spacing: 0.2px;
             line-height: 1;
             width: 100%;
@@ -211,7 +209,7 @@
             border-radius: 3px;
             background: rgba(0,0,0,0.45);
             color: #fff;
-            backdrop-filter: blur(4px);
+            
             line-height: 1.1;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -239,7 +237,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: transform 0.2s ease-out;
             box-shadow: 0 2px 8px rgba(0,0,0,0.4);
         }
 
@@ -260,7 +258,7 @@
             padding: 24px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.4);
             border: 1px solid var(--border);
-            transition: border-color 0.3s;
+            transition: border-color 0.3s ease;
         }
 
         .order-panel:hover {
@@ -344,7 +342,7 @@
             font-family: 'Inter', sans-serif;
             font-size: 14px;
             font-weight: 400;
-            transition: all 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
             outline: none;
         }
 
@@ -395,7 +393,7 @@
             gap: 12px;
             padding: 10px 14px;
             cursor: pointer;
-            transition: all 0.15s;
+            transition: background-color 0.15s ease;
             border-bottom: 1px solid var(--border);
         }
 
@@ -630,7 +628,7 @@
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
-            transition: all 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -745,6 +743,7 @@
             }
         }
     </style>
+<base target="_blank">
 </head>
 <body>
     <div class="header">
@@ -1097,7 +1096,7 @@
                             onfocus="this.select()">
                         <button class="qty-btn" onclick="updateQty('${item.code}', 1)">+</button>
                     </div>
-                    <button class="remove-btn" onclick="removeFromOrder('${item.code}')" title="Odstrani">×</button>
+                    <button class="remove-btn" onclick="removeFromOrder('${item.code}')" title="Odstrani">🗑️</button>
                 `;
                 list.appendChild(div);
             });
