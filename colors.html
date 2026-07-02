@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naročanje AK barv</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #16161f;
+            --bg-hover: #1e1e2a;
+            --bg-input: #1a1a24;
+            --accent: #b016e3;  /*#e63946;*/
+            --accent-hover: #f04a57;
+            --accent-glow: rgba(230, 57, 70, 0.3);
+            --text-primary: #f0f0f5;
+            --text-secondary: #9ca3af;
+            --text-muted: #6b7280;
+            --border: #252533;
+            --border-hover: #353545;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, #1a1a2e 100%);
+            padding: 20px 20px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), #ff6b6b, var(--accent));
+            background-size: 200% 100%;
+            animation: shimmer 3s ease infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 6px;
+            background: linear-gradient(135deg, #fff 0%, #e0e0e8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--accent);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .main-container {
+            display: flex;
+            gap: 24px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            align-items: flex-start;
+        }
+
+        .colors-section {
+            flex: 0 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .order-section {
+            flex: 1;
+            min-width: 380px;
+            max-width: 420px;
+            position: sticky;
+            top: 24px;
+            align-self: flex-start;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            align-self: flex-start;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            grid-template-rows: repeat(10, 1fr);
+            gap: 2px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            border: 1px solid var(--border);
+            width: 100%;
+            max-width: 900px;
+            aspect-ratio: 10 / 10;
+        }
+
+        .color-cell {
+            position: relative;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 3px 2px;
+            border: 2px solid transparent;
+            border-radius: 3px;
+            min-width: 0;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .color-cell:hover {
+            transform: scale(1.06);
+            z-index: 20;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+            border-color: var(--accent);
+        }
+
+        .color-cell.selected {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px var(--accent-glow), 0 0 16px rgba(230, 57, 70, 0.2);
+            z-index: 10;
+        }
+
+        .color-cell .color-code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 8px;
+            font-weight: 600;
+            text-align: center;
+            padding: 2px 3px;
+            border-radius: 3px;
+            background: rgba(0,0,0,0.45);
+            color: #fff;
+            backdrop-filter: blur(4px);
+            letter-spacing: 0.2px;
+            line-height: 1;
+            width: 100%;
+        }
+
+        .color-cell .color-name {
+            font-size: 7px;
+            font-weight: 500;
+            text-align: center;
+            padding: 2px 1px;
+            border-radius: 3px;
+            background: rgba(0,0,0,0.45);
+            color: #fff;
+            backdrop-filter: blur(4px);
+            line-height: 1.1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            letter-spacing: 0.1px;
+            width: 100%;
+        }
+
+        .color-cell.light-bg .color-code,
+        .color-cell.light-bg .color-name {
+            background: rgba(255,255,255,0.75);
+            color: #1a1a2e;
+            font-weight: 600;
+        }
+
+        .color-cell .check-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 20px;
+            height: 20px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+
+        .color-cell.selected .check-icon {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .color-cell .check-icon svg {
+            width: 12px;
+            height: 12px;
+            stroke: #fff;
+            stroke-width: 3;
+        }
+
+        .order-panel {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            border: 1px solid var(--border);
+            transition: border-color 0.3s;
+        }
+
+        .order-panel:hover {
+            border-color: var(--border-hover);
+        }
+
+        .order-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .order-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .order-header h2 .icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--accent), #ff6b6b);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .order-header h2 .icon svg {
+            width: 16px;
+            height: 16px;
+            stroke: #fff;
+            stroke-width: 2;
+        }
+
+        .order-count {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+            background: var(--bg-secondary);
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+        }
+
+        .search-input-wrapper .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .search-input-wrapper .search-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 14px 12px 42px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 400;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .search-dropdown {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            max-height: 280px;
+            overflow-y: auto;
+            z-index: 100;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            display: none;
+        }
+
+        .search-dropdown.active {
+            display: block;
+        }
+
+        .search-dropdown::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .search-dropdown::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .search-dropdown::-webkit-scrollbar-thumb {
+            background: var(--border-hover);
+            border-radius: 3px;
+        }
+
+        .search-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            cursor: pointer;
+            transition: all 0.15s;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .search-item:last-child {
+            border-bottom: none;
+        }
+
+        .search-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .search-item .search-color-preview {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: 2px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .search-item .search-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .search-item .search-item-code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .search-item .search-item-name {
+            font-size: 12px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .search-item .search-item-status {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .search-item .search-item-status.in-order {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .search-item .search-item-status.add {
+            background: var(--bg-hover);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+
+        .search-no-results {
+            padding: 20px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .order-list {
+            max-height: 420px;
+            overflow-y: auto;
+            margin-bottom: 16px;
+            scrollbar-gutter: stable;
+        }
+
+        .order-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .order-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .order-list::-webkit-scrollbar-thumb {
+            background: var(--border-hover);
+            border-radius: 3px;
+        }
+
+        .order-list::-webkit-scrollbar-corner {
+            background: transparent;
+        }
+
+        .order-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            transition: background-color 0.2s ease;
+            border: 1px solid transparent;
+            will-change: background-color;
+        }
+
+        .order-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .order-item .color-preview {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 2px solid var(--border);
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .order-item .item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .order-item .item-code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .order-item .item-name {
+            font-size: 13px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 500;
+        }
+
+        .order-item .qty-control {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .order-item .qty-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 700;
+            transition: color 0.15s ease, background-color 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .order-item .qty-btn:hover {
+            background-color: var(--accent);
+            color: #fff;
+        }
+
+        .order-item .qty-input {
+            width: 42px;
+            height: 28px;
+            text-align: center;
+            border: 1px solid var(--border);
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            outline: none;
+        }
+
+        .order-item .qty-input:focus {
+            border-color: var(--accent);
+        }
+
+        .order-item .remove-btn {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: color 0.15s ease, background-color 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .order-item .remove-btn:hover {
+            background-color: var(--accent);
+            color: #fff;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            stroke: var(--border-hover);
+            stroke-width: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+        }
+
+        .btn {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-copy {
+            background: linear-gradient(135deg, var(--accent) 0%, #c73e54 100%);
+            color: #fff;
+            box-shadow: 0 4px 16px var(--accent-glow);
+        }
+
+        .btn-copy:hover {
+            background: linear-gradient(135deg, var(--accent-hover) 0%, #e94560 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(230, 57, 70, 0.4);
+        }
+
+        .btn-copy:active {
+            transform: translateY(0);
+        }
+
+        .btn-reset {
+            background: var(--bg-secondary);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+
+        .btn-reset:hover {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+            box-shadow: 0 4px 16px var(--accent-glow);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--accent);
+            color: #fff;
+            padding: 14px 32px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .legend {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            margin-bottom: 10px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 4px;
+            border: 2px solid var(--border);
+        }
+
+
+        @media (max-width: 1200px) {
+            .main-container {
+                flex-direction: column;
+            }
+            .order-section {
+                position: static;
+                min-width: auto;
+            }
+            .color-grid {
+                max-width: 100%;
+                aspect-ratio: 10 / 10;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .color-grid {
+                max-width: 100%;
+                aspect-ratio: 10 / 10;
+            }
+            .color-cell .color-code {
+                font-size: 7px;
+            }
+            .color-cell .color-name {
+                font-size: 6px;
+            }
+            .header h1 {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Naročanje AK barv</h1>
+        <p></p>
+        <div class="header-badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            100 barv
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="colors-section">
+            <div class="section-title">Barvna paleta</div>
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: var(--accent); border: 2px solid var(--accent);"></div>
+                    <span>Klikni za izbiro</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: transparent; border: 2px solid var(--accent);"></div>
+                    <span>Izbrano</span>
+                </div>
+            </div>
+            <div class="color-grid" id="colorGrid"></div>
+        </div>
+
+        <div class="order-section">
+            <div class="order-panel">
+                <div class="order-header">
+                    <h2>
+                        <div class="icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                        </div>
+                        Seznam za naročilo
+                    </h2>
+                    <div class="order-count" id="orderCount">0 izbranih</div>
+                </div>
+
+
+                <div class="search-container">
+                    <div class="search-input-wrapper">
+                        <div class="search-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <path d="m21 21-4.35-4.35"></path>
+                            </svg>
+                        </div>
+                        <input type="text" class="search-input" id="searchInput" 
+                            placeholder="Iskalnik..."
+                            autocomplete="off">
+                    </div>
+                    <div class="search-dropdown" id="searchDropdown"></div>
+                </div>
+
+                <div class="order-list" id="orderList">
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        <div>Izberi barve za naročilo.</div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-copy" id="btnCopy" onclick="copyOrder()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        Kopiraj naročilo
+                    </button>
+                    <button class="btn btn-reset" id="btnReset" onclick="resetOrder()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="1 4 1 10 7 10"></polyline>
+                            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                        </svg>
+                        Ponastavi naročilo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+
+        const colors = [
+            {code: "AK11001", name: "WHITE", hex: "#FFFFFF"},
+            {code: "AK11002", name: "OFFWHITE", hex: "#F0EDE0"},
+            {code: "AK11004", name: "IVORY", hex: "#F0E8C8"},
+            {code: "AK11005", name: "GREENISH WHITE", hex: "#E8E8D8"},
+            {code: "AK11008", name: "GRIMY GREY", hex: "#C8B898"},
+            {code: "AK11010", name: "MEDIUM GREY", hex: "#B0B0A0"},
+            {code: "AK11013", name: "PALE GREY", hex: "#B0B0B0"},
+            {code: "AK11015", name: "DARK SEA GREY", hex: "#808080"},
+            {code: "AK11018", name: "NEUTRAL GREY", hex: "#707070"},
+            {code: "AK11022", name: "DARK GREY", hex: "#505050"},
+            {code: "AK11028", name: "SMOKE BLACK", hex: "#303030"},
+            {code: "AK11029", name: "BLACK", hex: "#181818"},
+            {code: "AK11031", name: "BUFF", hex: "#C8A860"},
+            {code: "AK11032", name: "PALE SAND", hex: "#E8D8A0"},
+            {code: "AK11033", name: "DARK SAND", hex: "#D8B860"},
+            {code: "AK11034", name: "MEDIUM SAND", hex: "#C8A040"},
+            {code: "AK11035", name: "SAND YELLOW", hex: "#D8C040"},
+            {code: "AK11038", name: "PALE YELLOW", hex: "#F8E860"},
+            {code: "AK11045", name: "DEEP YELLOW", hex: "#F0C000"},
+            {code: "AK11047", name: "LEMON YELLOW", hex: "#F8E020"},
+            {code: "AK11050", name: "LIGHT FLESH", hex: "#F8D8B0"},
+            {code: "AK11051", name: "LUMINOUS FLESH", hex: "#F0C890"},
+            {code: "AK11052", name: "BASIC SKIN TONE", hex: "#F0B070"},
+            {code: "AK11053", name: "RADIANT FLESH", hex: "#F0A050"},
+            {code: "AK11054", name: "MEDIUM FLESH TONE", hex: "#C88040"},
+            {code: "AK11055", name: "SUNNY SKIN TONE", hex: "#F0A840"},
+            {code: "AK11056", name: "DARK FLESH", hex: "#E09030"},
+            {code: "AK11059", name: "PASTEL PINK", hex: "#F8C0B0"},
+            {code: "AK11061", name: "SALMON", hex: "#F09070"},
+            {code: "AK11063", name: "BROWN ROSE", hex: "#C87060"},
+            {code: "AK11065", name: "INTENSE PINK", hex: "#F06080"},
+            {code: "AK11067", name: "MAGENTA", hex: "#C03060"},
+            {code: "AK11069", name: "PASTEL VIOLET", hex: "#F0D8F0"},
+            {code: "AK11070", name: "BLUE VIOLET", hex: "#9060B0"},
+            {code: "AK11071", name: "LILAC", hex: "#786090"},
+            {code: "AK11072", name: "DEEP VIOLET", hex: "#705080"},
+            {code: "AK11077", name: "LIGHT ORANGE", hex: "#F08040"},
+            {code: "AK11078", name: "MEDIUM ORANGE", hex: "#E86030"},
+            {code: "AK11081", name: "FLUORESCENT ORANGE", hex: "#F04020"},
+            {code: "AK11083", name: "DEAD RED", hex: "#E83040"},
+            {code: "AK11084", name: "RUBY", hex: "#D02030"},
+            {code: "AK11088", name: "DEEP RED", hex: "#D01020"},
+            {code: "AK11092", name: "MATT RED", hex: "#B03020"},
+            {code: "AK11096", name: "WINE RED", hex: "#701820"},
+            {code: "AK11097", name: "BURNT RED", hex: "#603020"},
+            {code: "AK11100", name: "LIGHT BROWN", hex: "#C88040"},
+            {code: "AK11102", name: "DEEP BROWN", hex: "#805030"},
+            {code: "AK11103", name: "MEDIUM RUST", hex: "#906040"},
+            {code: "AK11104", name: "SADDLE BROWN", hex: "#704030"},
+            {code: "AK11105", name: "LIGHT RUST", hex: "#D06030"},
+            {code: "AK11107", name: "DARK RUST", hex: "#603020"},
+            {code: "AK11109", name: "DARK BROWN", hex: "#503820"},
+            {code: "AK11111", name: "BURNT UMBER", hex: "#403020"},
+            {code: "AK11113", name: "CHOCOLATE (CHIPPING)", hex: "#302820"},
+            {code: "AK11114", name: "DECK TAN", hex: "#C0B8A0"},
+            {code: "AK11116", name: "TAN YELLOW", hex: "#D8A860"},
+            {code: "AK11118", name: "OCHRE", hex: "#C8A040"},
+            {code: "AK11120", name: "MUD BROWN", hex: "#705840"},
+            {code: "AK11124", name: "MIDDLE STONE", hex: "#887840"},
+            {code: "AK11126", name: "GREEN-BROWN", hex: "#706840"},
+            {code: "AK11130", name: "PISTACHIO", hex: "#D8D840"},
+            {code: "AK11131", name: "PASTEL GREEN", hex: "#B0D0A0"},
+            {code: "AK11133", name: "DARK GREEN GREY", hex: "#506850"},
+            {code: "AK11134", name: "GREEN SKY", hex: "#90B090"},
+            {code: "AK11136", name: "FROG GREEN", hex: "#80B020"},
+            {code: "AK11138", name: "INTERIOR YELLOW GREEN", hex: "#A0A020"},
+            {code: "AK11140", name: "GRASS GREEN", hex: "#608040"},
+            {code: "AK11142", name: "DEEP GREEN", hex: "#206840"},
+            {code: "AK11146", name: "DARK GREEN", hex: "#305030"},
+            {code: "AK11147", name: "OLIVE GREEN", hex: "#506030"},
+            {code: "AK11148", name: "MEDIUM OLIVE GREEN", hex: "#506040"},
+            {code: "AK11150", name: "GUNSHIP GREEN", hex: "#405040"},
+            {code: "AK11154", name: "GERMAN FIELD GREY", hex: "#504830"},
+            {code: "AK11156", name: "CAMOUFLAGE GREEN", hex: "#605840"},
+            {code: "AK11159", name: "RUSSIAN GREEN", hex: "#383830"},
+            {code: "AK11161", name: "PALE BLUE", hex: "#B0C0B0"},
+            {code: "AK11164", name: "DARK BLUE-GREY", hex: "#506860"},
+            {code: "AK11165", name: "GREY-BLUE", hex: "#607080"},
+            {code: "AK11166", name: "FRENCH BLUE", hex: "#506870"},
+            {code: "AK11168", name: "PASTEL BLUE", hex: "#B0D0B0"},
+            {code: "AK11170", name: "TURQUOISE", hex: "#206868"},
+            {code: "AK11174", name: "SNOW BLUE", hex: "#D0E0D8"},
+            {code: "AK11175", name: "SKY BLUE", hex: "#90C8D0"},
+            {code: "AK11176", name: "DEEP SKY BLUE", hex: "#60B0C0"},
+            {code: "AK11177", name: "DUCAT BLUE", hex: "#4090A0"},
+            {code: "AK11182", name: "DEEP BLUE", hex: "#204060"},
+            {code: "AK11184", name: "MEDIUM BLUE", hex: "#306878"},
+            {code: "AK11186", name: "LIGHT PRUSSIAN BLUE", hex: "#203848"},
+            {code: "AK11188", name: "OXFORD", hex: "#506068"},
+            {code: "AK11191", name: "GOLD", hex: "#B08020"},
+            {code: "AK11169", name: "BLUE GREEN", hex: "#408878"},
+            {code: "AK11196", name: "BRONZE", hex: "#806020"},
+            {code: "AK11197", name: "COPPER", hex: "#B06020"},
+            {code: "AK11207", name: "ALUMINIUM", hex: "#B0B0B0"},
+            {code: "AK11212", name: "GUN METAL", hex: "#505050"},
+            {code: "AK11213", name: "CLEAR RED", hex: "#D02020"},
+            {code: "AK11215", name: "CLEAR SMOKE", hex: "#705030"},
+            {code: "AK11216", name: "CLEAR GREEN", hex: "#00A040"},
+            {code: "AK11217", name: "CLEAR YELLOW", hex: "#F0A000"},
+            {code: "AK11218", name: "CLEAR ORANGE", hex: "#E86000"}
+        ];
+
+        let order = [];
+        const STORAGE_KEY = 'ak_color_order';
+
+
+        function loadOrder() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    order = JSON.parse(saved);
+                }
+            } catch (e) {
+                console.error('Failed to load order:', e);
+                order = [];
+            }
+        }
+
+
+        function saveOrder() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(order));
+            } catch (e) {
+                console.error('Failed to save order:', e);
+            }
+        }
+
+
+        function isLightColor(hex) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+            return brightness > 160;
+        }
+
+
+        function renderGrid() {
+            const grid = document.getElementById('colorGrid');
+            grid.innerHTML = '';
+
+            colors.forEach(color => {
+                const cell = document.createElement('div');
+                cell.className = 'color-cell';
+                cell.style.backgroundColor = color.hex;
+
+                const isLight = isLightColor(color.hex);
+                if (isLight) cell.classList.add('light-bg');
+
+                const inOrder = order.find(o => o.code === color.code);
+                if (inOrder) cell.classList.add('selected');
+
+                cell.innerHTML = `
+                    <div class="color-code">${color.code}</div>
+                    <div class="check-icon">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    </div>
+                    <div class="color-name">${color.name}</div>
+                `;
+
+                cell.onclick = () => toggleColor(color);
+                grid.appendChild(cell);
+            });
+        }
+
+
+        function toggleColor(color) {
+            const existingIndex = order.findIndex(o => o.code === color.code);
+
+            if (existingIndex >= 0) {
+                order.splice(existingIndex, 1);
+            } else {
+                order.push({
+                    code: color.code,
+                    name: color.name,
+                    hex: color.hex,
+                    qty: 1
+                });
+            }
+
+            saveOrder();
+            renderGrid();
+            renderOrderList();
+
+            document.getElementById('searchDropdown').classList.remove('active');
+            document.getElementById('searchInput').value = '';
+        }
+
+
+        function updateQty(code, delta) {
+            const item = order.find(o => o.code === code);
+            if (!item) return;
+
+            item.qty = Math.max(1, item.qty + delta);
+            saveOrder();
+            renderOrderList();
+        }
+
+
+        function setQty(code, value) {
+            const item = order.find(o => o.code === color.code);
+            if (!item) return;
+
+            const qty = parseInt(value) || 1;
+            item.qty = Math.max(1, qty);
+            saveOrder();
+            renderOrderList();
+        }
+
+
+        function removeFromOrder(code) {
+            order = order.filter(o => o.code !== code);
+            saveOrder();
+            renderGrid();
+            renderOrderList();
+        }
+
+
+        function renderOrderList() {
+            const list = document.getElementById('orderList');
+            const count = document.getElementById('orderCount');
+
+            const totalItems = order.reduce((sum, o) => sum + o.qty, 0);
+            const uniqueItems = order.length;
+
+            count.textContent = uniqueItems === 0
+                ? '0 izbranih'
+                : `${uniqueItems} ${uniqueItems === 1 ? 'barva' : (uniqueItems === 2 ? 'barvi' : (uniqueItems === 3 || uniqueItems === 4 ? 'barve' : 'barv'))} | ${totalItems} ${totalItems === 1 ? 'kos' : (totalItems === 2 ? 'kosa' : (totalItems === 3 || totalItems === 4 ? 'kosi' : 'kosov'))}`;
+
+            if (order.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        <div>Izberi barve iz nabora za naročilo.</div>
+                    </div>`;
+                return;
+            }
+
+            list.innerHTML = '';
+            order.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'order-item';
+                div.innerHTML = `
+                    <div class="color-preview" style="background-color: ${item.hex}"></div>
+                    <div class="item-info">
+                        <div class="item-code">${item.code}</div>
+                        <div class="item-name">${item.name}</div>
+                    </div>
+                    <div class="qty-control">
+                        <button class="qty-btn" onclick="updateQty('${item.code}', -1)">−</button>
+                        <input type="number" class="qty-input" value="${item.qty}"
+                            min="1" onchange="setQty('${item.code}', this.value)"
+                            onfocus="this.select()">
+                        <button class="qty-btn" onclick="updateQty('${item.code}', 1)">+</button>
+                    </div>
+                    <button class="remove-btn" onclick="removeFromOrder('${item.code}')" title="Odstrani">×</button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+
+        const searchInput = document.getElementById('searchInput');
+        const searchDropdown = document.getElementById('searchDropdown');
+
+        function performSearch(query) {
+            if (!query || query.trim().length < 1) {
+                searchDropdown.classList.remove('active');
+                return;
+            }
+
+            const q = query.toLowerCase().trim();
+            const results = colors.filter(color => {
+                return color.code.toLowerCase().includes(q) ||
+                       color.name.toLowerCase().includes(q);
+            });
+
+            if (results.length === 0) {
+                searchDropdown.innerHTML = '<div class="search-no-results">Ni rezultatov</div>';
+                searchDropdown.classList.add('active');
+                return;
+            }
+
+            searchDropdown.innerHTML = '';
+            results.forEach(color => {
+                const inOrder = order.find(o => o.code === color.code);
+                const item = document.createElement('div');
+                item.className = 'search-item';
+                item.innerHTML = `
+                    <div class="search-color-preview" style="background-color: ${color.hex}"></div>
+                    <div class="search-item-info">
+                        <div class="search-item-code">${color.code}</div>
+                        <div class="search-item-name">${color.name}</div>
+                    </div>
+                    <div class="search-item-status ${inOrder ? 'in-order' : 'add'}">
+                        ${inOrder ? 'V naročilu' : 'Dodaj'}
+                    </div>
+                `;
+                item.onclick = () => {
+                    toggleColor(color);
+                    searchInput.value = '';
+                    searchDropdown.classList.remove('active');
+                };
+                searchDropdown.appendChild(item);
+            });
+
+            searchDropdown.classList.add('active');
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            performSearch(e.target.value);
+        });
+
+        searchInput.addEventListener('focus', (e) => {
+            if (e.target.value.trim().length > 0) {
+                performSearch(e.target.value);
+            }
+        });
+
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-container')) {
+                searchDropdown.classList.remove('active');
+            }
+        });
+
+
+        function copyOrder() {
+            if (order.length === 0) {
+                showToast('Naročilo je prazno!', 'error');
+                return;
+            }
+
+            let text = '';
+
+            order.forEach((item, i) => {
+                text += `${String(i + 1).padStart(2, '0')}. ${item.code} — ${item.name} - količina ${item.qty}\n`;
+            });
+
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Naročilo kopirano!');
+            }).catch(err => {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast('Naročilo kopirano!');
+            });
+        }
+
+
+        function resetOrder() {
+            if (order.length === 0) return;
+
+            if (confirm('Ali ste prepričani, da želite izbrisati celotno naročilo?')) {
+                order = [];
+                saveOrder();
+                renderGrid();
+                renderOrderList();
+                showToast('Naročilo ponastavljeno!');
+            }
+        }
+
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.innerHTML = `
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                ${message}
+            `;
+            toast.style.background = type === 'error' ? '#c0392b' : 'var(--accent)';
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadOrder();
+            renderGrid();
+            renderOrderList();
+        });
+    </script>
+</body>
+</html>
