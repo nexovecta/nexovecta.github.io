@@ -1,1 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>No Access — Peter H. Portal</title>
+    <link rel="icon" type="image/png" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23ef4444'/%3E%3Ctext x='50' y='65' font-size='50' text-anchor='middle' fill='white'%3E🚫%3C/text%3E%3C/svg%3E" />
+    <link rel="icon" type="image/png" href="https://nexovecta.github.io/favicon.png" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
+        :root {
+            --bg: #050508;
+            --bg-card: #0f0f14;
+            --border: #1e1e2e;
+            --text: #f0f0f5;
+            --text-muted: #6b6b7b;
+            --accent: #6366f1;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Background */
+        .bg-mesh {
+            position: fixed;
+            inset: 0;
+            background: 
+                radial-gradient(ellipse 50% 50% at 50% 50%, rgba(239,68,68,0.06) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 40% at 20% 80%, rgba(99,102,241,0.04) 0%, transparent 50%);
+        }
+
+        .grid {
+            position: fixed;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 40px 24px;
+            max-width: 600px;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        /* Big lock icon */
+        .lock-icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 40px;
+            position: relative;
+        }
+
+        .lock-body {
+            width: 80px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--error), #dc2626);
+            border-radius: 12px;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 8px 32px rgba(239,68,68,0.3), 0 0 0 1px rgba(239,68,68,0.2);
+            animation: lock-pulse 3s ease-in-out infinite;
+        }
+
+        .lock-shackle {
+            width: 50px;
+            height: 45px;
+            border: 8px solid var(--error);
+            border-bottom: none;
+            border-radius: 25px 25px 0 0;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: shackle-shake 3s ease-in-out infinite;
+        }
+
+        .lock-keyhole {
+            width: 12px;
+            height: 12px;
+            background: var(--bg);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .lock-keyhole::after {
+            content: '';
+            width: 6px;
+            height: 14px;
+            background: var(--bg);
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 0 0 3px 3px;
+        }
+
+        @keyframes lock-pulse {
+            0%, 100% { box-shadow: 0 8px 32px rgba(239,68,68,0.3), 0 0 0 1px rgba(239,68,68,0.2); }
+            50% { box-shadow: 0 8px 40px rgba(239,68,68,0.5), 0 0 0 1px rgba(239,68,68,0.3), 0 0 60px rgba(239,68,68,0.15); }
+        }
+
+        @keyframes shackle-shake {
+            0%, 100% { transform: translateX(-50%) rotate(0deg); }
+            25% { transform: translateX(-50%) rotate(-3deg); }
+            75% { transform: translateX(-50%) rotate(3deg); }
+        }
+
+        /* Title */
+        .title {
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #fff, #fca5a5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.125rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        .hint {
+            font-size: 0.875rem;
+            color: var(--warning);
+            margin-bottom: 40px;
+            opacity: 0.8;
+        }
+
+        /* Status cards */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 40px;
+        }
+
+        .status-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 12px;
+            transition: all 0.3s ease;
+        }
+
+        .status-card:hover {
+            border-color: rgba(239,68,68,0.3);
+            transform: translateY(-2px);
+        }
+
+        .status-card .icon {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        .status-card .label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+
+        .status-card .value {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--error);
+        }
+
+        .status-card .value.green {
+            color: var(--success);
+        }
+
+        .status-card .value.yellow {
+            color: var(--warning);
+        }
+
+        /* Action buttons */
+        .actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: 100px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            color: white;
+            box-shadow: 0 4px 16px rgba(99,102,241,0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(99,102,241,0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 48px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .footer .error-code {
+            font-family: 'Courier New', monospace;
+            color: var(--error);
+            opacity: 0.5;
+            margin-top: 8px;
+            font-size: 0.7rem;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 480px) {
+            .status-grid { grid-template-columns: 1fr; }
+            .actions { flex-direction: column; }
+            .btn { width: 100%; justify-content: center; }
+        }
+    </style>
+<base target="_blank">
+</head>
+<body>
+    <div class="bg-mesh"></div>
+    <div class="grid"></div>
+
+    <div class="container">
+        <div class="lock-icon">
+            <div class="lock-shackle"></div>
+            <div class="lock-body">
+                <div class="lock-keyhole"></div>
+            </div>
+        </div>
+
+        <h1 class="title">Dostop zavrnjen</h1>
+        <p class="subtitle">Ta aplikacija je trenutno nedostopna.<br>Še vedno je v razvoju.</p>
+        <p class="hint">🔒 Preizkusna verzija — prihaja kmalu!</p>
+
+        <div class="status-grid">
+            <div class="status-card">
+                <div class="icon">🎮</div>
+                <div class="label">GAME</div>
+                <div class="value">WIP</div>
+            </div>
+            <div class="status-card">
+                <div class="icon">⚡</div>
+                <div class="label">ESPARK</div>
+                <div class="value">WIP</div>
+            </div>
+            <div class="status-card">
+                <div class="icon">🍔</div>
+                <div class="label">RECEPTKO</div>
+                <div class="value">WIP</div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <a href="index.html" class="btn btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Nazaj na portal
+            </a>
+            <a href="https://nexovecta.github.io/colors.html" class="btn btn-secondary" target="_blank">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+                Odpri COLORS
+            </a>
+        </div>
+
+        <div class="footer">
+            <p>© 2026 Peter H. — Vse pravice pridržane.</p>
+            <p class="error-code">ERR_ACCESS_DENIED | CODE: 403 | PORTAL_V1.0</p>
+        </div>
+    </div>
+</body>
+</html>
